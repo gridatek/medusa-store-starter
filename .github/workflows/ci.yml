@@ -50,6 +50,9 @@ jobs:
           echo "Docker services started, checking status..."
           docker compose ps
 
+      - name: Install dependencies
+        run: npm ci
+
       - name: Setup Backend Environment
         run: |
           cd backend
