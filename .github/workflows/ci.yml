@@ -34,7 +34,7 @@ jobs:
       - name: Wait for services and verify connection
         run: |
           echo "Waiting for Docker services to be healthy..."
-          timeout 120s bash -c 'until docker compose ps | grep -E "(healthy.*healthy|Up.*Up)" | wc -l | grep -q "2"; do 
+          timeout 120s bash -c 'until [ $(docker compose ps | grep -c "healthy") -eq 2 ]; do
             echo "Waiting for services... Current status:"
             docker compose ps
             sleep 5
