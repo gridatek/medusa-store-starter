@@ -20,21 +20,44 @@ jobs:
           node-version: '22'
           cache: 'npm'
 
-      - name: Start Docker services
-        run: |
-          docker compose up -d
-          echo "Waiting for services to be healthy..."
-          timeout 60s bash -c 'until docker compose ps | grep -q "healthy"; do sleep 2; done'
-          echo "Services are healthy!"
-
       - name: Install dependencies
         run: npm ci
+
+      - name: Wait for services and verify connection
+        run: |
+          echo "Waiting for Docker services to be healthy..."
+          timeout 120s bash -c 'until docker compose ps | grep -E "(healthy.*healthy|Up.*Up)" | wc -l | grep -q "2"; do 
+            echo "Waiting for services... Current status:"
+            docker compose ps
+            sleep 5
+          done'
+
+          echo "✅ Services are healthy!"
+          echo "Final service status:"
+          docker compose ps
+
+          echo "Testing database connection..."
+          docker compose exec -T postgres pg_isready -U postgres
+
+          echo "Testing Redis connection..."
+          docker compose exec -T redis redis-cli ping
+
+      - name: Start Docker services
+        run: |
+          echo "Starting Docker services..."
+          docker compose up -d
+
+          echo "Docker services started, checking status..."
+          docker compose ps
 
       - name: Setup Backend Environment
         run: |
           cd backend
           if [ -f .env.template ]; then
             cp .env.template .env
+            # Override database URL for CI
+            sed -i 's|^DATABASE_URL=.*|DATABASE_URL=postgres://postgres:postgres@localhost:5432/medusa-store|g' .env
+            sed -i 's|^REDIS_URL=.*|REDIS_URL=redis://localhost:6379|g' .env
           else
             cat > .env << EOF
           DATABASE_URL=postgres://postgres:postgres@localhost:5432/medusa-store
@@ -46,10 +69,21 @@ jobs:
           EOF
           fi
 
+          echo "✅ Backend .env configuration:"
+          echo "DATABASE_URL=postgres://postgres:postgres@localhost:5432/medusa-store"
+          echo "REDIS_URL=redis://localhost:6379"
+
       - name: Build and migrate backend
         run: |
           cd backend
+
+          echo "Current .env file:"
+          cat .env
+
+          echo "Building backend..."
           npm run build
+
+          echo "Running database migrations..."
           npx medusa db:migrate
 
       - name: Seed database (optional)
