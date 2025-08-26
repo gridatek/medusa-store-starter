@@ -1,0 +1,153 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Start Docker services
+        run: |
+          echo "Starting Docker services..."
+          docker compose up -d
+
+          echo "Docker services started, checking status..."
+          docker compose ps
+
+      - name: Wait for services and verify connection
+        run: |
+          echo "Waiting for Docker services to be healthy..."
+          timeout 120s bash -c 'until [ $(docker compose ps | grep -c "healthy") -eq 2 ]; do
+            echo "Waiting for services... Current status:"
+            docker compose ps
+            sleep 5
+          done'
+
+          echo "✅ Services are healthy!"
+          echo "Final service status:"
+          docker compose ps
+
+          echo "Testing database connection..."
+          docker compose exec -T postgres pg_isready -U postgres
+
+          echo "Testing Redis connection..."
+          docker compose exec -T redis redis-cli ping
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Setup Backend Environment
+        run: |
+          cd backend
+            cat > .env << EOF
+          DATABASE_URL=postgres://postgres:postgres@localhost:5432/medusa-store
+          REDIS_URL=redis://localhost:6379
+          JWT_SECRET=test-secret
+          COOKIE_SECRET=test-cookie-secret
+          NODE_ENV=development
+          PORT=9000
+          EOF
+
+          echo "✅ Backend .env configuration:"
+          echo "DATABASE_URL=postgres://postgres:postgres@localhost:5432/medusa-store"
+          echo "REDIS_URL=redis://localhost:6379"
+
+      - name: Build and migrate backend
+        run: |
+          cd backend
+
+          echo "Current .env file:"
+          cat .env
+
+          echo "Building backend..."
+          npm run build
+
+          echo "Running database migrations..."
+          npx medusa db:migrate
+
+      - name: Seed database (optional)
+        run: |
+          cd backend
+          npm run seed || echo "No seed script found, skipping..."
+        continue-on-error: true
+
+      - name: Start Medusa backend
+        run: |
+          cd backend
+          npm run start &
+          echo $! > ../backend.pid
+        env:
+          NODE_ENV: development
+
+      - name: Wait for backend to be ready
+        run: |
+          echo "Waiting for Medusa backend..."
+          timeout 60s bash -c 'until curl -f http://localhost:9000/health; do sleep 2; done'
+          echo "Backend is ready!"
+
+      - name: Build Angular storefront
+        run: |
+          cd storefront
+          npm run build
+
+      - name: Start Angular storefront
+        run: |
+          cd storefront
+          npm run start &
+          echo $! > ../storefront.pid
+        env:
+          NODE_ENV: development
+
+      - name: Wait for storefront to be ready
+        run: |
+          echo "Waiting for Angular storefront..."
+          timeout 60s bash -c 'until curl -f http://localhost:4200; do sleep 2; done'
+          echo "Storefront is ready!"
+
+      - name: Install Playwright browsers
+        run: |
+          cd e2e
+          npx playwright install chromium
+
+      - name: Run Playwright tests
+        run: |
+          cd e2e
+          npm run test
+        env:
+          CI: true
+
+      - name: Upload Playwright report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: playwright-report
+          path: e2e/playwright-report/
+          retention-days: 30
+
+      - name: Cleanup processes
+        if: always()
+        run: |
+          if [ -f backend.pid ]; then
+            kill $(cat backend.pid) || true
+          fi
+          if [ -f storefront.pid ]; then
+            kill $(cat storefront.pid) || true
+          fi
+          docker compose down
