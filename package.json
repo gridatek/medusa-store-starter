@@ -3,6 +3,7 @@
   "version": "0.0.0",
   "description": "Medusa Store Starter",
   "workspaces": [
+    "backend",
     "storefront",
     "e2e"
   ],
