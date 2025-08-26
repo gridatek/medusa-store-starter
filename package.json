@@ -1,0 +1,28 @@
+{
+  "name": "medusa-store-starter",
+  "version": "0.0.0",
+  "description": "Medusa Store Starter",
+  "scripts": {
+    "prepare": "husky"
+  },
+  "lint-staged": {
+    "**/*": "prettier --write --ignore-unknown"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gridatek/medusa-store-starter.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "MIT",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/gridatek/medusa-store-starter/issues"
+  },
+  "homepage": "https://github.com/gridatek/medusa-store-starter#readme",
+  "devDependencies": {
+    "husky": "^9.1.7",
+    "lint-staged": "^16.1.5",
+    "prettier": "3.6.2"
+  }
+}
