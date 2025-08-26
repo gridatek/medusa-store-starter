@@ -2,6 +2,9 @@
   "name": "medusa-store-starter",
   "version": "0.0.0",
   "description": "Medusa Store Starter",
+  "workspaces": [
+    "storefront"
+  ],
   "scripts": {
     "format": "prettier --write .",
     "format:check": "prettier --check .",
