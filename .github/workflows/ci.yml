@@ -56,12 +56,6 @@ jobs:
       - name: Setup Backend Environment
         run: |
           cd backend
-          if [ -f .env.template ]; then
-            cp .env.template .env
-            # Override database URL for CI
-            sed -i 's|^DATABASE_URL=.*|DATABASE_URL=postgres://postgres:postgres@localhost:5432/medusa-store|g' .env
-            sed -i 's|^REDIS_URL=.*|REDIS_URL=redis://localhost:6379|g' .env
-          else
             cat > .env << EOF
           DATABASE_URL=postgres://postgres:postgres@localhost:5432/medusa-store
           REDIS_URL=redis://localhost:6379
@@ -70,7 +64,6 @@ jobs:
           NODE_ENV=development
           PORT=9000
           EOF
-          fi
 
           echo "✅ Backend .env configuration:"
           echo "DATABASE_URL=postgres://postgres:postgres@localhost:5432/medusa-store"
