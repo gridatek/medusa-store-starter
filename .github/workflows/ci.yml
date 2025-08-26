@@ -23,6 +23,14 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Start Docker services
+        run: |
+          echo "Starting Docker services..."
+          docker compose up -d
+
+          echo "Docker services started, checking status..."
+          docker compose ps
+
       - name: Wait for services and verify connection
         run: |
           echo "Waiting for Docker services to be healthy..."
@@ -41,14 +49,6 @@ jobs:
 
           echo "Testing Redis connection..."
           docker compose exec -T redis redis-cli ping
-
-      - name: Start Docker services
-        run: |
-          echo "Starting Docker services..."
-          docker compose up -d
-
-          echo "Docker services started, checking status..."
-          docker compose ps
 
       - name: Install dependencies
         run: npm ci
