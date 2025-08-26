@@ -10,30 +10,6 @@ jobs:
   test-architecture:
     runs-on: ubuntu-latest
 
-    services:
-      postgres:
-        image: postgres:13
-        env:
-          POSTGRES_PASSWORD: postgres
-          POSTGRES_DB: medusa-store
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-        ports:
-          - 5432:5432
-
-      redis:
-        image: redis:7-alpine
-        options: >-
-          --health-cmd "redis-cli ping"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-        ports:
-          - 6379:6379
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -44,14 +20,23 @@ jobs:
           node-version: '22'
           cache: 'npm'
 
+      - name: Start Docker services
+        run: |
+          docker compose up -d
+          echo "Waiting for services to be healthy..."
+          timeout 60s bash -c 'until docker compose ps | grep -q "healthy"; do sleep 2; done'
+          echo "Services are healthy!"
+
       - name: Install dependencies
         run: npm ci
 
       - name: Setup Backend Environment
         run: |
           cd backend
-          cp .env.template .env || echo "No .env.template found, creating basic .env"
-          cat >> .env << EOF
+          if [ -f .env.template ]; then
+            cp .env.template .env
+          else
+            cat > .env << EOF
           DATABASE_URL=postgres://postgres:postgres@localhost:5432/medusa-store
           REDIS_URL=redis://localhost:6379
           JWT_SECRET=test-secret
@@ -59,6 +44,7 @@ jobs:
           NODE_ENV=development
           PORT=9000
           EOF
+          fi
 
       - name: Build and migrate backend
         run: |
@@ -134,6 +120,7 @@ jobs:
           if [ -f storefront.pid ]; then
             kill $(cat storefront.pid) || true
           fi
+          docker compose down
 
   workspace-validation:
     runs-on: ubuntu-latest
