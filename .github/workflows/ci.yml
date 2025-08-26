@@ -1,4 +1,4 @@
-name: CI - Architecture Validation
+name: CI
 
 on:
   push:
@@ -7,7 +7,7 @@ on:
     branches: [main]
 
 jobs:
-  test-architecture:
+  ci:
     runs-on: ubuntu-latest
 
     steps:
@@ -151,43 +151,3 @@ jobs:
             kill $(cat storefront.pid) || true
           fi
           docker compose down
-
-  workspace-validation:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '22'
-          cache: 'npm'
-
-      - name: Validate workspace structure
-        run: |
-          echo "Validating npm workspace structure..."
-          npm run validate-workspace || echo "No validate-workspace script found"
-
-          # Check if all workspace packages can be installed
-          npm ci
-
-          # Verify workspace packages
-          npm ls --workspaces || true
-
-          echo "Workspace validation completed!"
-
-      - name: Check workspace scripts
-        run: |
-          echo "Available workspace scripts:"
-          npm run || true
-
-          echo "Backend scripts:"
-          cd backend && npm run || true
-
-          echo "Storefront scripts:"
-          cd ../storefront && npm run || true
-
-          echo "E2E scripts:"
-          cd ../e2e && npm run || true
