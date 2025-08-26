@@ -3,7 +3,8 @@
   "version": "0.0.0",
   "description": "Medusa Store Starter",
   "workspaces": [
-    "storefront"
+    "storefront",
+    "e2e"
   ],
   "scripts": {
     "format": "prettier --write .",
