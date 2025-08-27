@@ -5,7 +5,8 @@
   "workspaces": [
     "backend",
     "storefront",
-    "e2e"
+    "e2e",
+    "shared"
   ],
   "scripts": {
     "format": "prettier --write .",
