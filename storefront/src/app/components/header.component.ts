@@ -15,11 +15,12 @@ import {
   formatPrice,
   getProductPrice,
 } from '../../../../shared/src/types';
+import { AuthModalComponent } from './auth-modal.component';
 
 @Component({
   selector: 'app-header',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, AuthModalComponent],
   template: `
     <header
       data-testid="header"
@@ -176,6 +177,13 @@ import {
               </div>
             </div>
           </div>
+
+          <!-- Auth Modal -->
+          <app-auth-modal
+            [isOpen]="showAuthModal"
+            (closeEvent)="closeAuthModal()"
+            (authSuccess)="onAuthSuccess()"
+          ></app-auth-modal>
 
           <!-- Right Side Actions -->
           <div class="flex items-center space-x-4">
