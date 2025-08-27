@@ -1,7 +1,7 @@
 // Authentication Service
 // storefront/src/app/services/auth.service.ts
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable, from, throwError } from 'rxjs';
+import { BehaviorSubject, Observable, from, throwError, switchMap } from 'rxjs';
 import { map, catchError, tap } from 'rxjs/operators';
 import {
   Customer,
@@ -51,7 +51,7 @@ export class AuthService {
         body: JSON.stringify(credentials),
       }),
     ).pipe(
-      map(async (response) => {
+      switchMap(async (response) => {
         if (!response.ok) {
           const error = await response.json();
           throw new Error(error.message || 'Login failed');
@@ -86,7 +86,7 @@ export class AuthService {
         body: JSON.stringify(registerData),
       }),
     ).pipe(
-      map(async (response) => {
+      switchMap(async (response) => {
         if (!response.ok) {
           const error = await response.json();
           throw new Error(error.message || 'Registration failed');
@@ -139,7 +139,7 @@ export class AuthService {
         },
       }),
     ).pipe(
-      map(async (response) => {
+      switchMap(async (response) => {
         if (!response.ok) {
           throw new Error('Failed to get customer data');
         }
