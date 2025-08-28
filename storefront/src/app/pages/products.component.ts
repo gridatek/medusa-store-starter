@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, inject } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject, signal } from '@angular/core';
 
 import { RouterModule, ActivatedRoute, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -411,7 +411,7 @@ export class ProductsComponent implements OnInit, OnDestroy {
   isAddingToCart: { [productId: string]: boolean } = {};
 
   // Filter states
-  searchQuery = '';
+  protected readonly searchQuery = signal('');
   selectedCollections: string[] = [];
   selectedTypes: string[] = [];
   selectedTags: string[] = [];
@@ -467,8 +467,8 @@ export class ProductsComponent implements OnInit, OnDestroy {
       offset: (this.currentPage - 1) * ITEMS_PER_PAGE,
     };
 
-    if (this.searchQuery) {
-      params.q = this.searchQuery;
+    if (this.searchQuery()) {
+      params.q = this.searchQuery();
     }
 
     if (this.selectedCollections.length > 0) {
@@ -547,7 +547,7 @@ export class ProductsComponent implements OnInit, OnDestroy {
   }
 
   clearAllFilters(): void {
-    this.searchQuery = '';
+    this.searchQuery.set('');
     this.selectedCollections = [];
     this.selectedTypes = [];
     this.selectedTags = [];
