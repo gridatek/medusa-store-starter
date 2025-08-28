@@ -119,15 +119,11 @@ jobs:
             echo "Backend not ready yet, waiting..."
             sleep 3
           done'
-          echo "✅ Backend health check passed"
+          echo "Backend health check passed"
 
-          # Additional wait for admin routes to be ready
-          echo "Testing admin auth endpoint availability..."
-          timeout 60s bash -c 'until curl -f -s -o /dev/null http://localhost:9000/admin/auth; do 
-            echo "Admin routes not ready yet, waiting..."
-            sleep 2
-          done'
-          echo "✅ Admin routes are ready"
+          echo "Waiting for admin routes to initialize..."
+          sleep 20
+          echo "Proceeding with API key generation..."
 
       - name: Generate Publishable API Key via Admin API
         working-directory: ./backend
