@@ -98,7 +98,9 @@ jobs:
           npx medusa user -e admin@github-ci.com -p ci-test-password-${{ github.run_id }}
           echo "✅ Admin user created successfully"
         env:
+          DATABASE_URL: postgres://postgres:postgres@localhost:5432/medusa-store
           REDIS_URL: redis://localhost:6379
+          NODE_ENV: development
 
       - name: Start Medusa backend
         run: |
