@@ -1,5 +1,4 @@
-// storefront/src/app/app.component.ts
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterOutlet } from '@angular/router';
 import { HeaderComponent } from './components/header.component';
@@ -23,7 +22,7 @@ import { CartService } from './services/cart.service';
 
       <!-- Loading overlay -->
       <div
-        *ngIf="isLoading"
+        *ngIf="isLoading()"
         data-testid="loading-spinner"
         class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center"
       >
@@ -37,7 +36,7 @@ import { CartService } from './services/cart.service';
   styles: [],
 })
 export class App implements OnInit {
-  isLoading = false;
+  isLoading = signal(false);
 
   constructor(
     private medusaApi: MedusaApiService,
@@ -45,7 +44,7 @@ export class App implements OnInit {
   ) {}
 
   async ngOnInit() {
-    this.isLoading = true;
+    this.isLoading.set(true);
 
     try {
       // Initialize app data
@@ -54,7 +53,7 @@ export class App implements OnInit {
     } catch (error) {
       console.error('Error initializing app:', error);
     } finally {
-      this.isLoading = false;
+      this.isLoading.set(false);
     }
   }
 }
