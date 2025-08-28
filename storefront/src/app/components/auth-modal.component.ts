@@ -1,6 +1,6 @@
 // Auth Modal Component
 // storefront/src/app/components/auth-modal.component.ts
-import { Component, Input, Output, EventEmitter } from '@angular/core';
+import { Component, Output, EventEmitter, input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AuthService } from '../services/auth.service';
@@ -12,7 +12,7 @@ import { LoginCredentials, RegisterData } from '../../../../shared/src/types';
   imports: [CommonModule, FormsModule],
   template: `
     <div
-      *ngIf="isOpen"
+      *ngIf="isOpen()"
       data-testid="auth-modal"
       class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center"
       (click)="closeModal($event)"
@@ -246,7 +246,7 @@ import { LoginCredentials, RegisterData } from '../../../../shared/src/types';
   `,
 })
 export class AuthModalComponent {
-  @Input() isOpen = false;
+  readonly isOpen = input(false);
   @Output() closeEvent = new EventEmitter<void>();
   @Output() authSuccess = new EventEmitter<void>();
 
