@@ -89,6 +89,8 @@ jobs:
           echo "Creating admin user..."
           npx medusa user -e admin@github-ci.com -p ci-test-password-${{ github.run_id }}
           echo "✅ Admin user created successfully"
+        env:
+          REDIS_URL: redis://localhost:6379
 
       - name: Start Medusa backend
         run: |
