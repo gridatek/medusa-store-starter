@@ -1,29 +1,31 @@
 import {
+  ChangeDetectionStrategy,
   Component,
-  OnInit,
   OnDestroy,
+  OnInit,
+  Signal,
+  ViewEncapsulation,
+  WritableSignal,
+  computed,
   inject,
   signal,
-  WritableSignal,
-  Signal,
-  computed,
 } from '@angular/core';
 
-import { RouterModule, ActivatedRoute, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { Subscription, combineLatest } from 'rxjs';
-import { MedusaApiService } from '../services/medusa-api.service';
-import { CartService } from '../services/cart.service';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
+import { Subscription } from 'rxjs';
 import {
+  ITEMS_PER_PAGE,
   Product,
   ProductCollection,
-  ProductType,
   ProductTag,
+  ProductType,
   formatPrice,
   getProductPrice,
   isProductInStock,
-  ITEMS_PER_PAGE,
 } from '../../../../shared/src/types';
+import { CartService } from '../services/cart.service';
+import { MedusaApiService } from '../services/medusa-api.service';
 
 interface FilterState {
   search?: string;
@@ -400,12 +402,14 @@ interface FilterState {
       }
     `,
   ],
+  encapsulation: ViewEncapsulation.None,
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ProductsComponent implements OnInit, OnDestroy {
-  private medusaApi = inject(MedusaApiService);
-  private cartService = inject(CartService);
-  private route = inject(ActivatedRoute);
-  private router = inject(Router);
+  private readonly medusaApi = inject(MedusaApiService);
+  private readonly cartService = inject(CartService);
+  private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
 
   products: Product[] = [];
   collections: ProductCollection[] = [];
@@ -427,7 +431,7 @@ export class ProductsComponent implements OnInit, OnDestroy {
   priceRange = { min: null as number | null, max: null as number | null };
   sortBy = '';
 
-  private subscriptions = new Subscription();
+  private readonly subscriptions = new Subscription();
 
   ngOnInit(): void {
     // Load filter options
