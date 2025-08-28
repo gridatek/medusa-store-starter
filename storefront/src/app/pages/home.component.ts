@@ -1,6 +1,6 @@
 // storefront/src/app/pages/home.component.ts
 import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { RouterModule } from '@angular/router';
 import { MedusaApiService } from '../services/medusa-api.service';
 import { CartService } from '../services/cart.service';
@@ -9,7 +9,7 @@ import { Product, formatPrice, getProductPrice } from '../../../../shared/src/ty
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [RouterModule],
   template: `
     <div class="min-h-screen">
       <!-- Hero Section -->
@@ -42,108 +42,122 @@ import { Product, formatPrice, getProductPrice } from '../../../../shared/src/ty
           </div>
 
           <!-- Loading State -->
-          <div *ngIf="isLoading" class="flex justify-center items-center py-12">
-            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-          </div>
+          @if (isLoading) {
+            <div class="flex justify-center items-center py-12">
+              <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+            </div>
+          }
 
           <!-- Error State -->
-          <div *ngIf="hasError && !isLoading" data-testid="error-message" class="text-center py-12">
-            <div class="text-red-500 mb-4">
-              <svg class="w-16 h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"
-                ></path>
-              </svg>
+          @if (hasError && !isLoading) {
+            <div data-testid="error-message" class="text-center py-12">
+              <div class="text-red-500 mb-4">
+                <svg
+                  class="w-16 h-16 mx-auto"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"
+                  ></path>
+                </svg>
+              </div>
+              <p class="text-lg text-gray-600 mb-4">Sorry, we couldn't load the products</p>
+              <button
+                class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+                (click)="loadProducts()"
+              >
+                Try Again
+              </button>
             </div>
-            <p class="text-lg text-gray-600 mb-4">Sorry, we couldn't load the products</p>
-            <button
-              class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors"
-              (click)="loadProducts()"
-            >
-              Try Again
-            </button>
-          </div>
+          }
 
           <!-- Products Grid -->
-          <div
-            *ngIf="!isLoading && !hasError"
-            data-testid="product-grid"
-            class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
-          >
+          @if (!isLoading && !hasError) {
             <div
-              *ngFor="let product of featuredProducts; trackBy: trackByProductId"
-              data-testid="product-card"
-              class="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow cursor-pointer group"
-              (click)="navigateToProduct(product)"
+              data-testid="product-grid"
+              class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
             >
-              <div class="aspect-w-1 aspect-h-1 w-full overflow-hidden rounded-t-lg bg-gray-200">
-                <img
-                  data-testid="product-image"
-                  [src]="getProductImage(product)"
-                  [alt]="product.title"
-                  class="w-full h-48 object-cover object-center group-hover:scale-105 transition-transform duration-300"
-                  (error)="onImageError($event)"
-                />
-              </div>
-
-              <div class="p-4">
-                <h3
-                  data-testid="product-title"
-                  class="text-lg font-medium text-gray-900 mb-2 line-clamp-2"
+              @for (product of featuredProducts; track trackByProductId($index, product)) {
+                <div
+                  data-testid="product-card"
+                  class="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow cursor-pointer group"
+                  (click)="navigateToProduct(product)"
                 >
-                  {{ product.title }}
-                </h3>
-
-                <p class="text-sm text-gray-600 mb-3 line-clamp-2">
-                  {{ product.description }}
-                </p>
-
-                <div class="flex items-center justify-between">
-                  <span data-testid="product-price" class="text-lg font-bold text-blue-600">
-                    {{ getFormattedPrice(product) }}
-                  </span>
-
-                  <button
-                    data-testid="quick-add-button"
-                    class="bg-blue-600 text-white px-3 py-2 rounded-md text-sm font-medium hover:bg-blue-700 transition-colors disabled:opacity-50"
-                    [disabled]="isAddingToCart[product.id]"
-                    (click)="quickAddToCart($event, product)"
+                  <div
+                    class="aspect-w-1 aspect-h-1 w-full overflow-hidden rounded-t-lg bg-gray-200"
                   >
-                    <span *ngIf="!isAddingToCart[product.id]">Add to Cart</span>
-                    <span *ngIf="isAddingToCart[product.id]" class="flex items-center">
-                      <div
-                        class="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"
-                      ></div>
-                      Adding...
-                    </span>
-                  </button>
+                    <img
+                      data-testid="product-image"
+                      [src]="getProductImage(product)"
+                      [alt]="product.title"
+                      class="w-full h-48 object-cover object-center group-hover:scale-105 transition-transform duration-300"
+                      (error)="onImageError($event)"
+                    />
+                  </div>
+                  <div class="p-4">
+                    <h3
+                      data-testid="product-title"
+                      class="text-lg font-medium text-gray-900 mb-2 line-clamp-2"
+                    >
+                      {{ product.title }}
+                    </h3>
+                    <p class="text-sm text-gray-600 mb-3 line-clamp-2">
+                      {{ product.description }}
+                    </p>
+                    <div class="flex items-center justify-between">
+                      <span data-testid="product-price" class="text-lg font-bold text-blue-600">
+                        {{ getFormattedPrice(product) }}
+                      </span>
+                      <button
+                        data-testid="quick-add-button"
+                        class="bg-blue-600 text-white px-3 py-2 rounded-md text-sm font-medium hover:bg-blue-700 transition-colors disabled:opacity-50"
+                        [disabled]="isAddingToCart[product.id]"
+                        (click)="quickAddToCart($event, product)"
+                      >
+                        @if (!isAddingToCart[product.id]) {
+                          <span>Add to Cart</span>
+                        }
+                        @if (isAddingToCart[product.id]) {
+                          <span class="flex items-center">
+                            <div
+                              class="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"
+                            ></div>
+                            Adding...
+                          </span>
+                        }
+                      </button>
+                    </div>
+                    <!-- Stock Status -->
+                    <div class="mt-2">
+                      @if (isInStock(product)) {
+                        <span class="text-xs text-green-600 font-medium"> In Stock </span>
+                      }
+                      @if (!isInStock(product)) {
+                        <span class="text-xs text-red-600 font-medium"> Out of Stock </span>
+                      }
+                    </div>
+                  </div>
                 </div>
-
-                <!-- Stock Status -->
-                <div class="mt-2">
-                  <span *ngIf="isInStock(product)" class="text-xs text-green-600 font-medium">
-                    In Stock
-                  </span>
-                  <span *ngIf="!isInStock(product)" class="text-xs text-red-600 font-medium">
-                    Out of Stock
-                  </span>
-                </div>
-              </div>
+              }
             </div>
-          </div>
+          }
 
           <!-- View All Products Button -->
-          <div class="text-center mt-12" *ngIf="!isLoading && featuredProducts.length > 0">
-            <a
-              routerLink="/products"
-              class="inline-block bg-blue-600 text-white px-8 py-3 rounded-lg text-lg font-semibold hover:bg-blue-700 transition-colors"
-            >
-              View All Products
-            </a>
-          </div>
+          @if (!isLoading && featuredProducts.length > 0) {
+            <div class="text-center mt-12">
+              <a
+                routerLink="/products"
+                class="inline-block bg-blue-600 text-white px-8 py-3 rounded-lg text-lg font-semibold hover:bg-blue-700 transition-colors"
+              >
+                View All Products
+              </a>
+            </div>
+          }
         </div>
       </section>
 

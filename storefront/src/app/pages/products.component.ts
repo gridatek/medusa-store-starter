@@ -1,6 +1,6 @@
 // storefront/src/app/pages/products.component.ts
 import { Component, OnInit, OnDestroy } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { RouterModule, ActivatedRoute, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { Subscription, combineLatest } from 'rxjs';
@@ -32,7 +32,7 @@ interface FilterState {
 @Component({
   selector: 'app-products',
   standalone: true,
-  imports: [CommonModule, RouterModule, FormsModule],
+  imports: [RouterModule, FormsModule],
   template: `
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <!-- Page Header -->
@@ -60,50 +60,58 @@ interface FilterState {
             </div>
 
             <!-- Collection Filter -->
-            <div class="mb-6" *ngIf="collections.length > 0">
-              <h3 class="text-sm font-medium text-gray-700 mb-3">Collections</h3>
-              <div class="space-y-2 max-h-40 overflow-y-auto">
-                <div *ngFor="let collection of collections" class="flex items-center">
-                  <input
-                    type="checkbox"
-                    [id]="'collection-' + collection.id"
-                    [value]="collection.id"
-                    [checked]="selectedCollections.includes(collection.id)"
-                    (change)="onCollectionChange(collection.id, $event)"
-                    class="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300 rounded"
-                  />
-                  <label
-                    [for]="'collection-' + collection.id"
-                    class="ml-2 text-sm text-gray-700 cursor-pointer"
-                  >
-                    {{ collection.title }}
-                  </label>
+            @if (collections.length > 0) {
+              <div class="mb-6">
+                <h3 class="text-sm font-medium text-gray-700 mb-3">Collections</h3>
+                <div class="space-y-2 max-h-40 overflow-y-auto">
+                  @for (collection of collections; track collection) {
+                    <div class="flex items-center">
+                      <input
+                        type="checkbox"
+                        [id]="'collection-' + collection.id"
+                        [value]="collection.id"
+                        [checked]="selectedCollections.includes(collection.id)"
+                        (change)="onCollectionChange(collection.id, $event)"
+                        class="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300 rounded"
+                      />
+                      <label
+                        [for]="'collection-' + collection.id"
+                        class="ml-2 text-sm text-gray-700 cursor-pointer"
+                      >
+                        {{ collection.title }}
+                      </label>
+                    </div>
+                  }
                 </div>
               </div>
-            </div>
+            }
 
             <!-- Product Type Filter -->
-            <div class="mb-6" *ngIf="productTypes.length > 0">
-              <h3 class="text-sm font-medium text-gray-700 mb-3">Product Types</h3>
-              <div class="space-y-2 max-h-40 overflow-y-auto">
-                <div *ngFor="let type of productTypes" class="flex items-center">
-                  <input
-                    type="checkbox"
-                    [id]="'type-' + type.id"
-                    [value]="type.id"
-                    [checked]="selectedTypes.includes(type.id)"
-                    (change)="onTypeChange(type.id, $event)"
-                    class="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300 rounded"
-                  />
-                  <label
-                    [for]="'type-' + type.id"
-                    class="ml-2 text-sm text-gray-700 cursor-pointer"
-                  >
-                    {{ type.value }}
-                  </label>
+            @if (productTypes.length > 0) {
+              <div class="mb-6">
+                <h3 class="text-sm font-medium text-gray-700 mb-3">Product Types</h3>
+                <div class="space-y-2 max-h-40 overflow-y-auto">
+                  @for (type of productTypes; track type) {
+                    <div class="flex items-center">
+                      <input
+                        type="checkbox"
+                        [id]="'type-' + type.id"
+                        [value]="type.id"
+                        [checked]="selectedTypes.includes(type.id)"
+                        (change)="onTypeChange(type.id, $event)"
+                        class="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300 rounded"
+                      />
+                      <label
+                        [for]="'type-' + type.id"
+                        class="ml-2 text-sm text-gray-700 cursor-pointer"
+                      >
+                        {{ type.value }}
+                      </label>
+                    </div>
+                  }
                 </div>
               </div>
-            </div>
+            }
 
             <!-- Price Range Filter -->
             <div class="mb-6">
@@ -135,21 +143,24 @@ interface FilterState {
             </div>
 
             <!-- Tags Filter -->
-            <div class="mb-6" *ngIf="tags.length > 0">
-              <h3 class="text-sm font-medium text-gray-700 mb-3">Tags</h3>
-              <div class="flex flex-wrap gap-2">
-                <button
-                  *ngFor="let tag of tags"
-                  class="px-2 py-1 text-xs border border-gray-300 rounded-full hover:border-blue-300 transition-colors"
-                  [class.bg-blue-100]="selectedTags.includes(tag.id)"
-                  [class.border-blue-500]="selectedTags.includes(tag.id)"
-                  [class.text-blue-700]="selectedTags.includes(tag.id)"
-                  (click)="toggleTag(tag.id)"
-                >
-                  {{ tag.value }}
-                </button>
+            @if (tags.length > 0) {
+              <div class="mb-6">
+                <h3 class="text-sm font-medium text-gray-700 mb-3">Tags</h3>
+                <div class="flex flex-wrap gap-2">
+                  @for (tag of tags; track tag) {
+                    <button
+                      class="px-2 py-1 text-xs border border-gray-300 rounded-full hover:border-blue-300 transition-colors"
+                      [class.bg-blue-100]="selectedTags.includes(tag.id)"
+                      [class.border-blue-500]="selectedTags.includes(tag.id)"
+                      [class.text-blue-700]="selectedTags.includes(tag.id)"
+                      (click)="toggleTag(tag.id)"
+                    >
+                      {{ tag.value }}
+                    </button>
+                  }
+                </div>
               </div>
-            </div>
+            }
 
             <!-- Clear Filters -->
             <button
@@ -189,167 +200,185 @@ interface FilterState {
           </div>
 
           <!-- Loading State -->
-          <div *ngIf="isLoading" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            <div
-              *ngFor="let item of [1, 2, 3, 4, 5, 6]"
-              class="bg-gray-200 rounded-lg h-80 animate-pulse"
-            ></div>
-          </div>
+          @if (isLoading) {
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              @for (item of [1, 2, 3, 4, 5, 6]; track item) {
+                <div class="bg-gray-200 rounded-lg h-80 animate-pulse"></div>
+              }
+            </div>
+          }
 
           <!-- Error State -->
-          <div *ngIf="hasError && !isLoading" data-testid="error-message" class="text-center py-16">
-            <div class="text-red-500 mb-4">
-              <svg class="w-16 h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"
-                ></path>
-              </svg>
+          @if (hasError && !isLoading) {
+            <div data-testid="error-message" class="text-center py-16">
+              <div class="text-red-500 mb-4">
+                <svg
+                  class="w-16 h-16 mx-auto"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"
+                  ></path>
+                </svg>
+              </div>
+              <p class="text-lg text-gray-600 mb-4">Failed to load products</p>
+              <button
+                class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+                (click)="loadProducts()"
+              >
+                Try Again
+              </button>
             </div>
-            <p class="text-lg text-gray-600 mb-4">Failed to load products</p>
-            <button
-              class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors"
-              (click)="loadProducts()"
-            >
-              Try Again
-            </button>
-          </div>
+          }
 
           <!-- Empty State -->
-          <div *ngIf="!isLoading && !hasError && products.length === 0" class="text-center py-16">
-            <div class="text-gray-400 mb-4">
-              <svg class="w-16 h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"
-                ></path>
-              </svg>
+          @if (!isLoading && !hasError && products.length === 0) {
+            <div class="text-center py-16">
+              <div class="text-gray-400 mb-4">
+                <svg
+                  class="w-16 h-16 mx-auto"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"
+                  ></path>
+                </svg>
+              </div>
+              <p class="text-lg text-gray-600 mb-2">No products found</p>
+              <p class="text-gray-500">Try adjusting your filters or search terms</p>
             </div>
-            <p class="text-lg text-gray-600 mb-2">No products found</p>
-            <p class="text-gray-500">Try adjusting your filters or search terms</p>
-          </div>
+          }
 
           <!-- Products Grid -->
-          <div
-            *ngIf="!isLoading && !hasError && products.length > 0"
-            data-testid="product-grid"
-            class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
-          >
+          @if (!isLoading && !hasError && products.length > 0) {
             <div
-              *ngFor="let product of products; trackBy: trackByProductId"
-              data-testid="product-card"
-              class="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow cursor-pointer group"
-              (click)="navigateToProduct(product)"
+              data-testid="product-grid"
+              class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
             >
-              <div class="aspect-w-1 aspect-h-1 w-full overflow-hidden rounded-t-lg bg-gray-200">
-                <img
-                  data-testid="product-image"
-                  [src]="getProductImage(product)"
-                  [alt]="product.title"
-                  class="w-full h-48 object-cover object-center group-hover:scale-105 transition-transform duration-300"
-                  (error)="onImageError($event)"
-                />
-              </div>
-
-              <div class="p-4">
-                <h3
-                  data-testid="product-title"
-                  class="text-lg font-medium text-gray-900 mb-2 line-clamp-2"
+              @for (product of products; track trackByProductId($index, product)) {
+                <div
+                  data-testid="product-card"
+                  class="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow cursor-pointer group"
+                  (click)="navigateToProduct(product)"
                 >
-                  {{ product.title }}
-                </h3>
-
-                <p class="text-sm text-gray-600 mb-3 line-clamp-2">
-                  {{ product.description }}
-                </p>
-
-                <div class="flex items-center justify-between mb-3">
-                  <span data-testid="product-price" class="text-lg font-bold text-blue-600">
-                    {{ getFormattedPrice(product) }}
-                  </span>
-
-                  <!-- Stock Status -->
-                  <div>
-                    <span *ngIf="isInStock(product)" class="text-xs text-green-600 font-medium">
-                      In Stock
-                    </span>
-                    <span *ngIf="!isInStock(product)" class="text-xs text-red-600 font-medium">
-                      Out of Stock
-                    </span>
+                  <div
+                    class="aspect-w-1 aspect-h-1 w-full overflow-hidden rounded-t-lg bg-gray-200"
+                  >
+                    <img
+                      data-testid="product-image"
+                      [src]="getProductImage(product)"
+                      [alt]="product.title"
+                      class="w-full h-48 object-cover object-center group-hover:scale-105 transition-transform duration-300"
+                      (error)="onImageError($event)"
+                    />
+                  </div>
+                  <div class="p-4">
+                    <h3
+                      data-testid="product-title"
+                      class="text-lg font-medium text-gray-900 mb-2 line-clamp-2"
+                    >
+                      {{ product.title }}
+                    </h3>
+                    <p class="text-sm text-gray-600 mb-3 line-clamp-2">
+                      {{ product.description }}
+                    </p>
+                    <div class="flex items-center justify-between mb-3">
+                      <span data-testid="product-price" class="text-lg font-bold text-blue-600">
+                        {{ getFormattedPrice(product) }}
+                      </span>
+                      <!-- Stock Status -->
+                      <div>
+                        @if (isInStock(product)) {
+                          <span class="text-xs text-green-600 font-medium"> In Stock </span>
+                        }
+                        @if (!isInStock(product)) {
+                          <span class="text-xs text-red-600 font-medium"> Out of Stock </span>
+                        }
+                      </div>
+                    </div>
+                    <button
+                      data-testid="quick-add-button"
+                      class="w-full bg-blue-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-blue-700 transition-colors disabled:opacity-50"
+                      [disabled]="isAddingToCart[product.id] || !isInStock(product)"
+                      (click)="quickAddToCart($event, product)"
+                    >
+                      @if (!isAddingToCart[product.id]) {
+                        <span>Add to Cart</span>
+                      }
+                      @if (isAddingToCart[product.id]) {
+                        <span class="flex items-center justify-center">
+                          <div
+                            class="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"
+                          ></div>
+                          Adding...
+                        </span>
+                      }
+                    </button>
+                    <!-- Product Tags -->
+                    @if (product.tags && product.tags.length > 0) {
+                      <div class="mt-2 flex flex-wrap gap-1">
+                        @for (tag of product.tags.slice(0, 3); track tag) {
+                          <span
+                            class="inline-block bg-gray-100 text-gray-600 text-xs px-2 py-1 rounded-full"
+                          >
+                            {{ tag.value }}
+                          </span>
+                        }
+                      </div>
+                    }
                   </div>
                 </div>
-
-                <button
-                  data-testid="quick-add-button"
-                  class="w-full bg-blue-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-blue-700 transition-colors disabled:opacity-50"
-                  [disabled]="isAddingToCart[product.id] || !isInStock(product)"
-                  (click)="quickAddToCart($event, product)"
-                >
-                  <span *ngIf="!isAddingToCart[product.id]">Add to Cart</span>
-                  <span *ngIf="isAddingToCart[product.id]" class="flex items-center justify-center">
-                    <div
-                      class="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"
-                    ></div>
-                    Adding...
-                  </span>
-                </button>
-
-                <!-- Product Tags -->
-                <div
-                  *ngIf="product.tags && product.tags.length > 0"
-                  class="mt-2 flex flex-wrap gap-1"
-                >
-                  <span
-                    *ngFor="let tag of product.tags.slice(0, 3)"
-                    class="inline-block bg-gray-100 text-gray-600 text-xs px-2 py-1 rounded-full"
-                  >
-                    {{ tag.value }}
-                  </span>
-                </div>
-              </div>
+              }
             </div>
-          </div>
+          }
 
           <!-- Pagination -->
-          <div *ngIf="totalPages > 1" data-testid="pagination" class="mt-12 flex justify-center">
-            <nav class="flex items-center space-x-2">
-              <button
-                class="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50"
-                [disabled]="currentPage === 1"
-                (click)="goToPage(currentPage - 1)"
-              >
-                Previous
-              </button>
-
-              <button
-                *ngFor="let page of getVisiblePages()"
-                class="px-3 py-2 text-sm font-medium border rounded-md"
-                [class.bg-blue-600]="page === currentPage"
-                [class.text-white]="page === currentPage"
-                [class.border-blue-600]="page === currentPage"
-                [class.bg-white]="page !== currentPage"
-                [class.text-gray-700]="page !== currentPage"
-                [class.border-gray-300]="page !== currentPage"
-                [class.hover:bg-gray-50]="page !== currentPage"
-                (click)="goToPage(page)"
-              >
-                {{ page }}
-              </button>
-
-              <button
-                data-testid="pagination-next"
-                class="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50"
-                [disabled]="currentPage === totalPages"
-                (click)="goToPage(currentPage + 1)"
-              >
-                Next
-              </button>
-            </nav>
-          </div>
+          @if (totalPages > 1) {
+            <div data-testid="pagination" class="mt-12 flex justify-center">
+              <nav class="flex items-center space-x-2">
+                <button
+                  class="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50"
+                  [disabled]="currentPage === 1"
+                  (click)="goToPage(currentPage - 1)"
+                >
+                  Previous
+                </button>
+                @for (page of getVisiblePages(); track page) {
+                  <button
+                    class="px-3 py-2 text-sm font-medium border rounded-md"
+                    [class.bg-blue-600]="page === currentPage"
+                    [class.text-white]="page === currentPage"
+                    [class.border-blue-600]="page === currentPage"
+                    [class.bg-white]="page !== currentPage"
+                    [class.text-gray-700]="page !== currentPage"
+                    [class.border-gray-300]="page !== currentPage"
+                    [class.hover:bg-gray-50]="page !== currentPage"
+                    (click)="goToPage(page)"
+                  >
+                    {{ page }}
+                  </button>
+                }
+                <button
+                  data-testid="pagination-next"
+                  class="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50"
+                  [disabled]="currentPage === totalPages"
+                  (click)="goToPage(currentPage + 1)"
+                >
+                  Next
+                </button>
+              </nav>
+            </div>
+          }
         </div>
       </div>
     </div>

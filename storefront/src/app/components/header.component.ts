@@ -1,6 +1,6 @@
 // storefront/src/app/components/header.component.ts
 import { Component, OnInit, OnDestroy } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { RouterModule } from '@angular/router';
 import { Subject, Subscription } from 'rxjs';
 import { debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
@@ -20,7 +20,7 @@ import { AuthModalComponent } from './auth-modal.component';
 @Component({
   selector: 'app-header',
   standalone: true,
-  imports: [CommonModule, RouterModule, AuthModalComponent],
+  imports: [RouterModule, AuthModalComponent],
   template: `
     <header
       data-testid="header"
@@ -105,77 +105,80 @@ import { AuthModalComponent } from './auth-modal.component';
                   ></path>
                 </svg>
               </div>
-              <div
-                *ngIf="isSearchLoading"
-                class="absolute inset-y-0 right-0 pr-3 flex items-center"
-              >
-                <div class="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-500"></div>
-              </div>
+              @if (isSearchLoading) {
+                <div class="absolute inset-y-0 right-0 pr-3 flex items-center">
+                  <div class="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-500"></div>
+                </div>
+              }
             </div>
 
             <!-- Search Results Dropdown -->
-            <div
-              *ngIf="showSearchResults && (searchResults.length > 0 || showNoResults)"
-              data-testid="search-results"
-              class="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-96 overflow-y-auto z-50"
-            >
-              <!-- Results -->
-              <div *ngIf="searchResults.length > 0" class="py-2">
-                <div
-                  *ngFor="let product of searchResults; trackBy: trackByProductId"
-                  data-testid="search-result-item"
-                  class="px-4 py-3 hover:bg-gray-50 cursor-pointer border-b border-gray-100 last:border-b-0"
-                  (click)="onProductClick(product)"
-                >
-                  <div class="flex items-center space-x-3">
-                    <img
-                      [src]="product.thumbnail || '/assets/placeholder-product.png'"
-                      [alt]="product.title"
-                      class="w-12 h-12 object-cover rounded-md flex-shrink-0"
-                    />
-                    <div class="flex-1 min-w-0">
-                      <h3
-                        data-testid="product-name"
-                        class="text-sm font-medium text-gray-900 truncate"
-                      >
-                        {{ product.title }}
-                      </h3>
-                      <p class="text-sm text-gray-500 truncate">
-                        {{ product.description }}
-                      </p>
-                      <p data-testid="product-price" class="text-sm font-semibold text-blue-600">
-                        {{ getFormattedPrice(product) }}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <!-- No Results -->
+            @if (showSearchResults && (searchResults.length > 0 || showNoResults)) {
               <div
-                *ngIf="searchResults.length === 0 && showNoResults"
-                data-testid="no-results-message"
-                class="px-4 py-8 text-center"
+                data-testid="search-results"
+                class="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-96 overflow-y-auto z-50"
               >
-                <div class="text-gray-400 mb-2">
-                  <svg
-                    class="w-12 h-12 mx-auto"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
-                      d="m21 21-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                    ></path>
-                  </svg>
-                </div>
-                <p class="text-sm text-gray-500">No results found</p>
-                <p class="text-xs text-gray-400 mt-1">Try different keywords</p>
+                <!-- Results -->
+                @if (searchResults.length > 0) {
+                  <div class="py-2">
+                    @for (product of searchResults; track trackByProductId($index, product)) {
+                      <div
+                        data-testid="search-result-item"
+                        class="px-4 py-3 hover:bg-gray-50 cursor-pointer border-b border-gray-100 last:border-b-0"
+                        (click)="onProductClick(product)"
+                      >
+                        <div class="flex items-center space-x-3">
+                          <img
+                            [src]="product.thumbnail || '/assets/placeholder-product.png'"
+                            [alt]="product.title"
+                            class="w-12 h-12 object-cover rounded-md flex-shrink-0"
+                          />
+                          <div class="flex-1 min-w-0">
+                            <h3
+                              data-testid="product-name"
+                              class="text-sm font-medium text-gray-900 truncate"
+                            >
+                              {{ product.title }}
+                            </h3>
+                            <p class="text-sm text-gray-500 truncate">
+                              {{ product.description }}
+                            </p>
+                            <p
+                              data-testid="product-price"
+                              class="text-sm font-semibold text-blue-600"
+                            >
+                              {{ getFormattedPrice(product) }}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    }
+                  </div>
+                }
+                <!-- No Results -->
+                @if (searchResults.length === 0 && showNoResults) {
+                  <div data-testid="no-results-message" class="px-4 py-8 text-center">
+                    <div class="text-gray-400 mb-2">
+                      <svg
+                        class="w-12 h-12 mx-auto"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          d="m21 21-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                        ></path>
+                      </svg>
+                    </div>
+                    <p class="text-sm text-gray-500">No results found</p>
+                    <p class="text-xs text-gray-400 mt-1">Try different keywords</p>
+                  </div>
+                }
               </div>
-            </div>
+            }
           </div>
 
           <!-- Auth Modal -->
@@ -188,10 +191,52 @@ import { AuthModalComponent } from './auth-modal.component';
           <!-- Right Side Actions -->
           <div class="flex items-center space-x-4">
             <!-- User Account - when logged in -->
-            <div *ngIf="currentCustomer" class="relative group">
+            @if (currentCustomer) {
+              <div class="relative group">
+                <button
+                  data-testid="user-menu-button"
+                  class="flex items-center space-x-2 text-gray-600 hover:text-gray-900 p-2 transition-colors"
+                >
+                  <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                    ></path>
+                  </svg>
+                  <span class="hidden md:block">{{ currentCustomer.first_name || 'Account' }}</span>
+                </button>
+                <!-- Dropdown Menu -->
+                <div
+                  class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-50 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200"
+                >
+                  <a
+                    routerLink="/account"
+                    class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                    >My Account</a
+                  >
+                  <a
+                    routerLink="/account/orders"
+                    class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                    >Orders</a
+                  >
+                  <button
+                    (click)="logout()"
+                    class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                  >
+                    Sign Out
+                  </button>
+                </div>
+              </div>
+            }
+
+            <!-- User Account - when not logged in -->
+            @if (!currentCustomer) {
               <button
-                data-testid="user-menu-button"
-                class="flex items-center space-x-2 text-gray-600 hover:text-gray-900 p-2 transition-colors"
+                data-testid="login-button"
+                class="text-gray-600 hover:text-gray-900 p-2 transition-colors"
+                (click)="toggleAuthModal()"
               >
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path
@@ -201,48 +246,8 @@ import { AuthModalComponent } from './auth-modal.component';
                     d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
                   ></path>
                 </svg>
-                <span class="hidden md:block">{{ currentCustomer.first_name || 'Account' }}</span>
               </button>
-
-              <!-- Dropdown Menu -->
-              <div
-                class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-50 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200"
-              >
-                <a
-                  routerLink="/account"
-                  class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                  >My Account</a
-                >
-                <a
-                  routerLink="/account/orders"
-                  class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                  >Orders</a
-                >
-                <button
-                  (click)="logout()"
-                  class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                >
-                  Sign Out
-                </button>
-              </div>
-            </div>
-
-            <!-- User Account - when not logged in -->
-            <button
-              *ngIf="!currentCustomer"
-              data-testid="login-button"
-              class="text-gray-600 hover:text-gray-900 p-2 transition-colors"
-              (click)="toggleAuthModal()"
-            >
-              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-                ></path>
-              </svg>
-            </button>
+            }
 
             <!-- Cart -->
             <button
@@ -258,13 +263,14 @@ import { AuthModalComponent } from './auth-modal.component';
                   d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5H3M7 13l-1.6 8h9.2M9 19v2m6-2v2"
                 ></path>
               </svg>
-              <span
-                *ngIf="cartSummary.itemCount > 0"
-                data-testid="cart-counter"
-                class="absolute -top-1 -right-1 bg-blue-600 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-medium"
-              >
-                {{ cartSummary.itemCount }}
-              </span>
+              @if (cartSummary.itemCount > 0) {
+                <span
+                  data-testid="cart-counter"
+                  class="absolute -top-1 -right-1 bg-blue-600 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-medium"
+                >
+                  {{ cartSummary.itemCount }}
+                </span>
+              }
             </button>
 
             <!-- Mobile Menu Button -->
@@ -274,20 +280,22 @@ import { AuthModalComponent } from './auth-modal.component';
               (click)="toggleMobileMenu()"
             >
               <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path
-                  *ngIf="!showMobileMenu"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M4 6h16M4 12h16M4 18h16"
-                ></path>
-                <path
-                  *ngIf="showMobileMenu"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M6 18L18 6M6 6l12 12"
-                ></path>
+                @if (!showMobileMenu) {
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M4 6h16M4 12h16M4 18h16"
+                  ></path>
+                }
+                @if (showMobileMenu) {
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M6 18L18 6M6 6l12 12"
+                  ></path>
+                }
               </svg>
             </button>
           </div>
@@ -295,42 +303,38 @@ import { AuthModalComponent } from './auth-modal.component';
       </div>
 
       <!-- Mobile Menu -->
-      <div
-        *ngIf="showMobileMenu"
-        data-testid="mobile-menu"
-        class="md:hidden bg-white border-t border-gray-200"
-      >
-        <div class="px-2 pt-2 pb-3 space-y-1">
-          <a
-            routerLink="/products"
-            class="block px-3 py-2 text-base font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-md"
-            (click)="closeMobileMenu()"
-          >
-            Products
-          </a>
-          <a
-            routerLink="/collections"
-            class="block px-3 py-2 text-base font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-md"
-            (click)="closeMobileMenu()"
-          >
-            Collections
-          </a>
-          <a
-            routerLink="/about"
-            class="block px-3 py-2 text-base font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-md"
-            (click)="closeMobileMenu()"
-          >
-            About
-          </a>
+      @if (showMobileMenu) {
+        <div data-testid="mobile-menu" class="md:hidden bg-white border-t border-gray-200">
+          <div class="px-2 pt-2 pb-3 space-y-1">
+            <a
+              routerLink="/products"
+              class="block px-3 py-2 text-base font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-md"
+              (click)="closeMobileMenu()"
+            >
+              Products
+            </a>
+            <a
+              routerLink="/collections"
+              class="block px-3 py-2 text-base font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-md"
+              (click)="closeMobileMenu()"
+            >
+              Collections
+            </a>
+            <a
+              routerLink="/about"
+              class="block px-3 py-2 text-base font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-md"
+              (click)="closeMobileMenu()"
+            >
+              About
+            </a>
+          </div>
         </div>
-      </div>
+      }
 
       <!-- Search Results Overlay -->
-      <div
-        *ngIf="showSearchResults"
-        class="fixed inset-0 z-40 bg-transparent"
-        (click)="closeSearchResults()"
-      ></div>
+      @if (showSearchResults) {
+        <div class="fixed inset-0 z-40 bg-transparent" (click)="closeSearchResults()"></div>
+      }
     </header>
   `,
   styles: [],
