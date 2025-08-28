@@ -82,7 +82,7 @@ jobs:
           echo "Running database migrations..."
           npx medusa db:migrate
 
-      - name: Seed database (optional)
+      - name: Seed database
         run: |
           cd backend
           npm run seed || echo "No seed script found, skipping..."
