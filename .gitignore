@@ -59,3 +59,6 @@ blob-report/
 # Database
 *.sqlite
 *.db
+
+#backend
+/backend/.env.development
