@@ -160,6 +160,22 @@ jobs:
 
           # Get existing publishable API keys
           echo "Getting existing publishable API keys..."
+          set +e  # Temporarily disable exit on error
+          KEYS_RESPONSE=$(curl -s -w "\nHTTP_CODE:%{http_code}" -X GET "$BACKEND_URL/admin/publishable-api-keys" \
+          -H "Authorization: Bearer $ACCESS_TOKEN" 2>&1)
+            CURL_EXIT_CODE=$?
+            set -e  # Re-enable exit on error
+
+          echo "Curl exit code: $CURL_EXIT_CODE"
+          echo "Keys response: $KEYS_RESPONSE"
+            
+            if [ $CURL_EXIT_CODE -ne 0 ]; then
+            echo "Curl command failed with exit code $CURL_EXIT_CODE"
+            exit 1
+            fi
+
+          # Get existing publishable API keys
+          echo "Getting existing publishable API keys..."
           KEYS_RESPONSE=$(curl -s -w "\nHTTP_CODE:%{http_code}" -X GET "$BACKEND_URL/admin/publishable-api-keys" \
             -H "Authorization: Bearer $ACCESS_TOKEN")
             
