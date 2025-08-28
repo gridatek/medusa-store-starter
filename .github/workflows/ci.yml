@@ -88,6 +88,45 @@ jobs:
           npm run seed || echo "No seed script found, skipping..."
         continue-on-error: true
 
+      - name: Generate Publishable API Key
+        working-directory: ./backend
+        run: |
+          echo "Creating publishable API key..."
+
+          # Create a publishable API key using Medusa CLI
+          PUBLISHABLE_KEY=$(npx medusa exec --file - <<'EOF'
+          const { medusaContainer } = require('@medusajs/medusa');
+          const publishableApiKeyService = medusaContainer.resolve('publishableApiKeyService');
+
+          async function createKey() {
+            const key = await publishableApiKeyService.create({ title: 'CI Test Key' });
+            console.log(key.id);
+          }
+
+          createKey().catch(console.error);
+          EOF
+          )
+
+          echo "Generated publishable key: $PUBLISHABLE_KEY"
+          echo "PUBLISHABLE_API_KEY=$PUBLISHABLE_KEY" >> $GITHUB_ENV
+
+      - name: Create storefront config
+        working-directory: ./storefront
+        run: |
+          echo "Creating environment.json with API key..."
+
+          mkdir -p public/assets/config
+
+          cat > public/assets/config/environment.json << EOF
+          {
+            "medusaApiUrl": "http://localhost:9000",
+            "medusaPublishableApiKey": "${{ env.PUBLISHABLE_API_KEY }}"
+          }
+          EOF
+
+          echo "✅ Config file created at public/assets/config/environment.json:"
+          cat public/assets/config/environment.json
+
       - name: Start Medusa backend
         run: |
           cd backend
