@@ -86,6 +86,10 @@ jobs:
           cd backend
           npm run seed || echo "No seed script found, skipping..."
         continue-on-error: true
+        env:
+          DATABASE_URL: postgres://postgres:postgres@localhost:5432/medusa-store
+          REDIS_URL: redis://localhost:6379
+          NODE_ENV: development
 
       - name: Create Admin User
         working-directory: ./backend
