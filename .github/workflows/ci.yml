@@ -159,10 +159,10 @@ jobs:
 
           # Create publishable API key
           echo "Creating publishable API key..."
-          KEY_RESPONSE=$(curl -s -w "\nHTTP_CODE:%{http_code}" -X POST http://localhost:9000/admin/publishable-api-keys \
+          KEY_RESPONSE=$(curl -s -w "\nHTTP_CODE:%{http_code}" -X POST http://localhost:9000/admin/api-keys \
             -H "Content-Type: application/json" \
             -H "Authorization: Bearer $ACCESS_TOKEN" \
-            -d '{"title": "CI Test Key"}')
+            -d '{"title": "CI Test Key", "type": "publishable"}')
             
             echo "Key creation response: $KEY_RESPONSE"
             
@@ -174,8 +174,8 @@ jobs:
               exit 1
             fi
             
-            # Extract the publishable key
-            PUBLISHABLE_KEY=$(echo "$KEY_RESPONSE" | grep -o '"id":"pk_[^"]*"' | cut -d'"' -f4)
+            # Extract the publishable key (should be in api_key.token field)
+            PUBLISHABLE_KEY=$(echo "$KEY_RESPONSE" | grep -o '"token":"[^"]*"' | cut -d'"' -f4)
               
               if [ -z "$PUBLISHABLE_KEY" ]; then
               echo "Failed to extract publishable API key from response"
