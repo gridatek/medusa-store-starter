@@ -132,7 +132,7 @@ jobs:
 
           # Try the correct admin auth endpoint
           echo "Testing admin authentication..."
-          AUTH_RESPONSE=$(curl -s -w "\nHTTP_CODE:%{http_code}" -X POST http://localhost:9000/store/auth \
+          AUTH_RESPONSE=$(curl -s -w "\nHTTP_CODE:%{http_code}" -X POST http://localhost:9000/admin/auth \
             -H "Content-Type: application/json" \
             -d '{"email": "admin@github-ci.com", "password": "ci-test-password-${{ github.run_id }}"}')
 
