@@ -88,27 +88,25 @@ jobs:
           npm run seed || echo "No seed script found, skipping..."
         continue-on-error: true
 
-      - name: Generate Publishable API Key
+      - name: Create Admin User
         working-directory: ./backend
         run: |
-          echo "Creating publishable API key..."
+          echo "Creating admin user..."
+          npx medusa user -e admin@github-ci.com -p ci-test-password-${{ github.run_id }}
+          echo "✅ Admin user created successfully"
 
-          # Create a publishable API key using Medusa CLI
-          PUBLISHABLE_KEY=$(npx medusa exec --file - <<'EOF'
-          const { medusaContainer } = require('@medusajs/medusa');
-          const publishableApiKeyService = medusaContainer.resolve('publishableApiKeyService');
+      - name: Generate Publishable API Key via Admin API
+        working-directory: ./backend
+        run: |
+          echo "Generating publishable API key via Admin API..."
 
-          async function createKey() {
-            const key = await publishableApiKeyService.create({ title: 'CI Test Key' });
-            console.log(key.id);
-          }
+          # First, authenticate with admin API
+          AUTH_RESPONSE=$(curl -s -X POST http://localhost:9000/admin/auth \
+            -H "Content-Type: application/json" \
+            -d '{"email": "admin@github-ci.com", "password": "ci-test-password-${{ github.run_id }}"}')
 
-          createKey().catch(console.error);
-          EOF
-          )
-
-          echo "Generated publishable key: $PUBLISHABLE_KEY"
-          echo "PUBLISHABLE_API_KEY=$PUBLISHABLE_KEY" >> $GITHUB_ENV
+          # Extract access token
+          ACCESS_TOKEN=$(echo $AUTH_RESPONSE | grep -o '"access_token":"[^"]*' | grep -o '[^"]*
 
       - name: Create storefront config
         working-directory: ./storefront
