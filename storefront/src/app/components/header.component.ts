@@ -105,7 +105,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
                   ></path>
                 </svg>
               </div>
-              @if (isSearchLoading) {
+              @if (isSearchLoading()) {
                 <div class="absolute inset-y-0 right-0 pr-3 flex items-center">
                   <div class="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-500"></div>
                 </div>
@@ -366,7 +366,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
 
   showSearchResults = false;
   showNoResults = false;
-  isSearchLoading = false;
+  protected readonly isSearchLoading = computed(() => this.productsResource.isLoading());
   showMobileMenu = false;
   showAuthModal = false;
   currentCustomer: Customer | null = null;
@@ -462,12 +462,12 @@ export class HeaderComponent implements OnInit, OnDestroy {
     this.showSearchResults = false;
   }
 
-  clearSearch(): void {
+  protected clearSearch(): void {
     this.productsResource.set(undefined);
     // this.searchResults = [];
     this.showSearchResults = false;
     this.showNoResults = false;
-    this.isSearchLoading = false;
+    // this.isSearchLoading = false;
   }
 
   toggleMobileMenu(): void {
