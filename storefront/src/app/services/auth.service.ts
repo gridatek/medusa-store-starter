@@ -15,10 +15,10 @@ import { ConfigService } from './config.service';
   providedIn: 'root',
 })
 export class AuthService {
-  private configService = inject(ConfigService);
+  private readonly configService = inject(ConfigService);
 
-  private currentCustomer$ = new BehaviorSubject<Customer | null>(null);
-  private isAuthenticated$ = new BehaviorSubject<boolean>(false);
+  private readonly currentCustomer$ = new BehaviorSubject<Customer | null>(null);
+  private readonly isAuthenticated$ = new BehaviorSubject<boolean>(false);
 
   constructor() {
     this.checkAuthState();
