@@ -1,19 +1,19 @@
-import { Injectable, inject } from '@angular/core';
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient, HttpParams, httpResource, HttpResourceRef } from '@angular/common/http';
+import { inject, Injectable } from '@angular/core';
 import { BehaviorSubject, Observable, throwError } from 'rxjs';
-import { map, catchError } from 'rxjs/operators';
-import { ConfigService } from './config.service';
+import { catchError, map } from 'rxjs/operators';
 import {
-  Product,
-  ProductsResponse,
-  ProductResponse,
   Cart,
   CartResponse,
+  DEFAULT_REGION,
+  ENDPOINTS,
+  Product,
+  ProductResponse,
+  ProductsResponse,
   Region,
   RegionsResponse,
-  ENDPOINTS,
-  DEFAULT_REGION,
 } from '../../../../shared/src/types';
+import { ConfigService } from './config.service';
 
 @Injectable({
   providedIn: 'root',
@@ -52,7 +52,7 @@ export class MedusaApiService {
     type_id?: string[];
     tags?: string[];
     region_id?: string;
-  }): Observable<Product[]> {
+  }) {
     let httpParams = new HttpParams();
 
     if (params?.offset) httpParams = httpParams.set('offset', params.offset.toString());
@@ -77,13 +77,20 @@ export class MedusaApiService {
 
     const url = `${this.apiBaseUrl}${ENDPOINTS.PRODUCTS}`;
 
-    return this.http.get<ProductsResponse>(url, { params: httpParams }).pipe(
-      map((response) => response.products),
-      catchError((error) => {
-        console.error('Error fetching products:', error);
-        return throwError(error);
-      }),
-    );
+    // return this.http.get<ProductsResponse>(url, { params: httpParams }).pipe(
+    //   map((response) => response.products),
+    //   catchError((error) => {
+    //     console.error('Error fetching products:', error);
+    //     return throwError(error);
+    //   }),
+    // );
+
+    return httpResource<ProductsResponse>(() => {
+      return {
+        url: url,
+        params: httpParams,
+      };
+    });
   }
 
   getProduct(id: string): Observable<Product> {
@@ -98,9 +105,9 @@ export class MedusaApiService {
     );
   }
 
-  searchProducts(query: string): Observable<Product[]> {
-    return this.getProducts({ q: query, limit: 10 });
-  }
+  // searchProducts(query: string): Observable<Product[]> {
+  //   return this.getProducts({ q: query, limit: 10 });
+  // }
 
   // Regions
   getRegions(): Observable<Region[]> {

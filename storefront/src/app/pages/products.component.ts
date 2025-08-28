@@ -209,7 +209,7 @@ interface FilterState {
           </div>
 
           <!-- Loading State -->
-          @if (isLoading) {
+          @if (isLoading()) {
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               @for (item of [1, 2, 3, 4, 5, 6]; track item) {
                 <div class="bg-gray-200 rounded-lg h-80 animate-pulse"></div>
@@ -218,7 +218,7 @@ interface FilterState {
           }
 
           <!-- Error State -->
-          @if (hasError && !isLoading) {
+          @if (hasError() && !isLoading()) {
             <div data-testid="error-message" class="text-center py-16">
               <div class="text-red-500 mb-4">
                 <svg
@@ -246,7 +246,7 @@ interface FilterState {
           }
 
           <!-- Empty State -->
-          @if (!isLoading && !hasError && products.length === 0) {
+          @if (!isLoading() && !hasError() && products.length === 0) {
             <div class="text-center py-16">
               <div class="text-gray-400 mb-4">
                 <svg
@@ -269,12 +269,12 @@ interface FilterState {
           }
 
           <!-- Products Grid -->
-          @if (!isLoading && !hasError && products.length > 0) {
+          @if (!isLoading() && !hasError() && products.length > 0) {
             <div
               data-testid="product-grid"
               class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
             >
-              @for (product of products; track trackByProductId($index, product)) {
+              @for (product of products(); track trackByProductId($index, product)) {
                 <div
                   data-testid="product-card"
                   class="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow cursor-pointer group"
@@ -357,21 +357,21 @@ interface FilterState {
               <nav class="flex items-center space-x-2">
                 <button
                   class="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50"
-                  [disabled]="currentPage === 1"
-                  (click)="goToPage(currentPage - 1)"
+                  [disabled]="currentPage() === 1"
+                  (click)="goToPage(currentPage() - 1)"
                 >
                   Previous
                 </button>
                 @for (page of getVisiblePages(); track page) {
                   <button
                     class="px-3 py-2 text-sm font-medium border rounded-md"
-                    [class.bg-blue-600]="page === currentPage"
-                    [class.text-white]="page === currentPage"
-                    [class.border-blue-600]="page === currentPage"
-                    [class.bg-white]="page !== currentPage"
-                    [class.text-gray-700]="page !== currentPage"
-                    [class.border-gray-300]="page !== currentPage"
-                    [class.hover:bg-gray-50]="page !== currentPage"
+                    [class.bg-blue-600]="page === currentPage()"
+                    [class.text-white]="page === currentPage()"
+                    [class.border-blue-600]="page === currentPage()"
+                    [class.bg-white]="page !== currentPage()"
+                    [class.text-gray-700]="page !== currentPage()"
+                    [class.border-gray-300]="page !== currentPage()"
+                    [class.hover:bg-gray-50]="page !== currentPage()"
                     (click)="goToPage(page)"
                   >
                     {{ page }}
@@ -380,8 +380,8 @@ interface FilterState {
                 <button
                   data-testid="pagination-next"
                   class="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50"
-                  [disabled]="currentPage === totalPages"
-                  (click)="goToPage(currentPage + 1)"
+                  [disabled]="currentPage() === totalPages"
+                  (click)="goToPage(currentPage() + 1)"
                 >
                   Next
                 </button>
@@ -411,73 +411,10 @@ export class ProductsComponent implements OnInit, OnDestroy {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
 
-  products: Product[] = [];
-  collections: ProductCollection[] = [];
-  productTypes: ProductType[] = [];
-  tags: ProductTag[] = [];
-
-  totalProducts = 0;
-  totalPages = 0;
-  currentPage = 1;
-  isLoading = true;
-  hasError = false;
-  isAddingToCart: { [productId: string]: boolean } = {};
-
-  // Filter states
-  protected readonly searchQuery = signal('');
-  protected readonly selectedCollections: WritableSignal<string[]> = signal([]);
-  protected readonly selectedTypes: WritableSignal<string[]> = signal([]);
-  protected readonly selectedTags: WritableSignal<string[]> = signal([]);
-  priceRange = { min: null as number | null, max: null as number | null };
-  sortBy = '';
-
-  private readonly subscriptions = new Subscription();
-
-  ngOnInit(): void {
-    // Load filter options
-    this.loadCollections();
-    this.loadProductTypes();
-    this.loadTags();
-
-    // Load initial products
-    this.loadProducts();
-  }
-
-  ngOnDestroy(): void {
-    this.subscriptions.unsubscribe();
-  }
-
-  async loadProducts(): Promise<void> {
-    this.isLoading = true;
-    this.hasError = false;
-
-    try {
-      const params = this.computeApiParams();
-
-      this.medusaApi.getProducts(params).subscribe({
-        next: (products) => {
-          this.products = products;
-          this.totalProducts = products.length; // In real implementation, get from API response
-          this.totalPages = Math.ceil(this.totalProducts / ITEMS_PER_PAGE);
-          this.isLoading = false;
-        },
-        error: (error) => {
-          console.error('Error loading products:', error);
-          this.hasError = true;
-          this.isLoading = false;
-        },
-      });
-    } catch (error) {
-      console.error('Error loading products:', error);
-      this.hasError = true;
-      this.isLoading = false;
-    }
-  }
-
   private readonly computeApiParams: Signal<any> = computed(() => {
     const params: any = {
       limit: ITEMS_PER_PAGE,
-      offset: (this.currentPage - 1) * ITEMS_PER_PAGE,
+      offset: (this.currentPage() - 1) * ITEMS_PER_PAGE,
     };
 
     if (this.searchQuery()) {
@@ -499,6 +436,78 @@ export class ProductsComponent implements OnInit, OnDestroy {
     return params;
   });
 
+  private readonly productsResource = this.medusaApi.getProducts(this.computeApiParams());
+
+  protected readonly products: Signal<Product[]> = computed(
+    () => this.productsResource.value()?.products || [],
+  );
+
+  collections: ProductCollection[] = [];
+  productTypes: ProductType[] = [];
+  tags: ProductTag[] = [];
+
+  totalProducts = 0;
+  totalPages = 0;
+  protected readonly currentPage = signal(1);
+  protected readonly isLoading = computed(() => this.productsResource.isLoading());
+  protected readonly hasError = computed(() => !!this.productsResource.error());
+  isAddingToCart: { [productId: string]: boolean } = {};
+
+  // Filter states
+  protected readonly searchQuery = signal('');
+  protected readonly selectedCollections: WritableSignal<string[]> = signal([]);
+  protected readonly selectedTypes: WritableSignal<string[]> = signal([]);
+  protected readonly selectedTags: WritableSignal<string[]> = signal([]);
+  priceRange = { min: null as number | null, max: null as number | null };
+  sortBy = '';
+
+  private readonly subscriptions = new Subscription();
+
+  ngOnInit(): void {
+    // Load filter options
+    this.loadCollections();
+    this.loadProductTypes();
+    this.loadTags();
+
+    // Load initial products
+    // this.loadProducts();
+  }
+
+  ngOnDestroy(): void {
+    this.subscriptions.unsubscribe();
+  }
+
+  protected loadProducts() {
+    console.log('Loading products again...');
+  }
+
+  // async loadProducts(): Promise<void> {
+  //   this.isLoading = true;
+  //   this.hasError = false;
+
+  //   try {
+  //     const params = this.computeApiParams();
+
+  //     this.medusaApi.getProducts(params).subscribe({
+  //       next: (products) => {
+  //         this.products = products;
+  //         this.totalProducts = products.length; // In real implementation, get from API response
+  //         this.totalPages = Math.ceil(this.totalProducts / ITEMS_PER_PAGE);
+  //         this.isLoading = false;
+  //       },
+  //       error: (error) => {
+  //         console.error('Error loading products:', error);
+  //         this.hasError = true;
+  //         this.isLoading = false;
+  //       },
+  //     });
+  //   } catch (error) {
+  //     console.error('Error loading products:', error);
+  //     this.hasError = true;
+  //     this.isLoading = false;
+  //   }
+  // }
+
   private async loadCollections(): Promise<void> {
     // In a real implementation, you'd have a collections endpoint
     this.collections = [];
@@ -515,8 +524,8 @@ export class ProductsComponent implements OnInit, OnDestroy {
   }
 
   onSearchChange(): void {
-    this.currentPage = 1;
-    this.loadProducts();
+    this.currentPage.set(1);
+    // this.loadProducts();
   }
 
   onCollectionChange(collectionId: string, event: any): void {
@@ -530,8 +539,8 @@ export class ProductsComponent implements OnInit, OnDestroy {
         selectedCollections.filter((id) => id !== collectionId),
       );
     }
-    this.currentPage = 1;
-    this.loadProducts();
+    this.currentPage.set(1);
+    // this.loadProducts();
   }
 
   onTypeChange(typeId: string, event: any): void {
@@ -540,8 +549,8 @@ export class ProductsComponent implements OnInit, OnDestroy {
     } else {
       this.selectedTypes.update((selectedTypes) => selectedTypes.filter((id) => id !== typeId));
     }
-    this.currentPage = 1;
-    this.loadProducts();
+    this.currentPage.set(1);
+    // this.loadProducts();
   }
 
   toggleTag(tagId: string): void {
@@ -550,18 +559,18 @@ export class ProductsComponent implements OnInit, OnDestroy {
     } else {
       this.selectedTags.update((selectedTags) => [...selectedTags, tagId]);
     }
-    this.currentPage = 1;
-    this.loadProducts();
+    this.currentPage.set(1);
+    // this.loadProducts();
   }
 
   onPriceRangeChange(): void {
-    this.currentPage = 1;
-    this.loadProducts();
+    this.currentPage.set(1);
+    // this.loadProducts();
   }
 
   onSortChange(): void {
-    this.currentPage = 1;
-    this.loadProducts();
+    this.currentPage.set(1);
+    // this.loadProducts();
   }
 
   clearAllFilters(): void {
@@ -571,14 +580,14 @@ export class ProductsComponent implements OnInit, OnDestroy {
     this.selectedTags.set([]);
     this.priceRange = { min: null, max: null };
     this.sortBy = '';
-    this.currentPage = 1;
-    this.loadProducts();
+    this.currentPage.set(1);
+    // this.loadProducts();
   }
 
   goToPage(page: number): void {
     if (page >= 1 && page <= this.totalPages) {
-      this.currentPage = page;
-      this.loadProducts();
+      this.currentPage.set(page);
+      // this.loadProducts();
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   }
@@ -587,7 +596,7 @@ export class ProductsComponent implements OnInit, OnDestroy {
     const pages: number[] = [];
     const maxVisible = 5;
 
-    let start = Math.max(1, this.currentPage - Math.floor(maxVisible / 2));
+    let start = Math.max(1, this.currentPage() - Math.floor(maxVisible / 2));
     let end = Math.min(this.totalPages, start + maxVisible - 1);
 
     if (end - start < maxVisible - 1) {
