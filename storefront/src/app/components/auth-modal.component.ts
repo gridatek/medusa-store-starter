@@ -1,6 +1,4 @@
-// Auth Modal Component
-// storefront/src/app/components/auth-modal.component.ts
-import { Component, Output, EventEmitter, input } from '@angular/core';
+import { Component, Output, EventEmitter, input, inject } from '@angular/core';
 
 import { FormsModule } from '@angular/forms';
 import { AuthService } from '../services/auth.service';
@@ -248,6 +246,8 @@ import { LoginCredentials, RegisterData } from '../../../../shared/src/types';
   `,
 })
 export class AuthModalComponent {
+  private authService = inject(AuthService);
+
   readonly isOpen = input(false);
   @Output() closeEvent = new EventEmitter<void>();
   @Output() authSuccess = new EventEmitter<void>();
@@ -268,8 +268,6 @@ export class AuthModalComponent {
     last_name: '',
     phone: '',
   };
-
-  constructor(private authService: AuthService) {}
 
   closeModal(event?: Event): void {
     if (event && event.target === event.currentTarget) {

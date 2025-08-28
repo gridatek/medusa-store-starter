@@ -1,6 +1,4 @@
-// Cart Page Component
-// storefront/src/app/pages/cart.component.ts
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject } from '@angular/core';
 
 import { RouterModule } from '@angular/router';
 import { Subscription } from 'rxjs';
@@ -177,6 +175,8 @@ import { Cart, CartSummary, LineItem, formatPrice } from '../../../../shared/src
   `,
 })
 export class CartComponent implements OnInit, OnDestroy {
+  private cartService = inject(CartService);
+
   cart: Cart | null = null;
   cartSummary: CartSummary = {
     subtotal: 0,
@@ -189,8 +189,6 @@ export class CartComponent implements OnInit, OnDestroy {
   isUpdating: { [itemId: string]: boolean } = {};
 
   private subscriptions = new Subscription();
-
-  constructor(private cartService: CartService) {}
 
   ngOnInit(): void {
     this.subscriptions.add(

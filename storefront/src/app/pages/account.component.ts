@@ -1,6 +1,4 @@
-// Account Page Component
-// storefront/src/app/pages/account.component.ts
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Subscription } from 'rxjs';
@@ -157,12 +155,12 @@ import { Customer, Order } from '../../../../shared/src/types';
   `,
 })
 export class AccountComponent implements OnInit, OnDestroy {
+  private authService = inject(AuthService);
+
   customer: Customer | null = null;
   orders: Order[] = [];
 
   private subscriptions = new Subscription();
-
-  constructor(private authService: AuthService) {}
 
   ngOnInit(): void {
     this.subscriptions.add(

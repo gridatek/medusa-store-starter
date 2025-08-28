@@ -1,5 +1,4 @@
-// storefront/src/app/components/header.component.ts
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject } from '@angular/core';
 
 import { RouterModule } from '@angular/router';
 import { Subject, Subscription } from 'rxjs';
@@ -340,6 +339,10 @@ import { AuthModalComponent } from './auth-modal.component';
   styles: [],
 })
 export class HeaderComponent implements OnInit, OnDestroy {
+  private cartService = inject(CartService);
+  private medusaApi = inject(MedusaApiService);
+  private authService = inject(AuthService);
+
   searchQuery = '';
   searchResults: Product[] = [];
   showSearchResults = false;
@@ -359,12 +362,6 @@ export class HeaderComponent implements OnInit, OnDestroy {
 
   private searchSubject = new Subject<string>();
   private subscriptions = new Subscription();
-
-  constructor(
-    private cartService: CartService,
-    private medusaApi: MedusaApiService,
-    private authService: AuthService,
-  ) {}
 
   ngOnInit(): void {
     // Setup search debouncing

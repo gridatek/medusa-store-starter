@@ -1,6 +1,4 @@
-// Authentication Service
-// storefront/src/app/services/auth.service.ts
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { BehaviorSubject, Observable, from, throwError, switchMap } from 'rxjs';
 import { map, catchError, tap } from 'rxjs/operators';
 import {
@@ -17,10 +15,12 @@ import { ConfigService } from './config.service';
   providedIn: 'root',
 })
 export class AuthService {
+  private configService = inject(ConfigService);
+
   private currentCustomer$ = new BehaviorSubject<Customer | null>(null);
   private isAuthenticated$ = new BehaviorSubject<boolean>(false);
 
-  constructor(private configService: ConfigService) {
+  constructor() {
     this.checkAuthState();
   }
 

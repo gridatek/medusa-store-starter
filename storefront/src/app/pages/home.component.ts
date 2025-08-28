@@ -1,5 +1,4 @@
-// storefront/src/app/pages/home.component.ts
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 
 import { RouterModule } from '@angular/router';
 import { MedusaApiService } from '../services/medusa-api.service';
@@ -264,15 +263,13 @@ import { Product, formatPrice, getProductPrice } from '../../../../shared/src/ty
   styles: [],
 })
 export class HomeComponent implements OnInit {
+  private medusaApi = inject(MedusaApiService);
+  private cartService = inject(CartService);
+
   featuredProducts: Product[] = [];
   isLoading = true;
   hasError = false;
   isAddingToCart: { [productId: string]: boolean } = {};
-
-  constructor(
-    private medusaApi: MedusaApiService,
-    private cartService: CartService,
-  ) {}
 
   ngOnInit(): void {
     this.loadProducts();

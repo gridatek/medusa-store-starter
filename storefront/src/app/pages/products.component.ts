@@ -1,10 +1,8 @@
-// storefront/src/app/pages/products.component.ts
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject } from '@angular/core';
 
 import { RouterModule, ActivatedRoute, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { Subscription, combineLatest } from 'rxjs';
-import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { MedusaApiService } from '../services/medusa-api.service';
 import { CartService } from '../services/cart.service';
 import {
@@ -395,6 +393,11 @@ interface FilterState {
   ],
 })
 export class ProductsComponent implements OnInit, OnDestroy {
+  private medusaApi = inject(MedusaApiService);
+  private cartService = inject(CartService);
+  private route = inject(ActivatedRoute);
+  private router = inject(Router);
+
   products: Product[] = [];
   collections: ProductCollection[] = [];
   productTypes: ProductType[] = [];
@@ -416,13 +419,6 @@ export class ProductsComponent implements OnInit, OnDestroy {
   sortBy = '';
 
   private subscriptions = new Subscription();
-
-  constructor(
-    private medusaApi: MedusaApiService,
-    private cartService: CartService,
-    private route: ActivatedRoute,
-    private router: Router,
-  ) {}
 
   ngOnInit(): void {
     // Load filter options

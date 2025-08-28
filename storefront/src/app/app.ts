@@ -1,4 +1,4 @@
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, OnInit, signal, inject } from '@angular/core';
 
 import { RouterOutlet } from '@angular/router';
 import { HeaderComponent } from './components/header.component';
@@ -37,12 +37,10 @@ import { CartService } from './services/cart.service';
   styles: [],
 })
 export class App implements OnInit {
-  isLoading = signal(false);
+  private medusaApi = inject(MedusaApiService);
+  private cartService = inject(CartService);
 
-  constructor(
-    private medusaApi: MedusaApiService,
-    private cartService: CartService,
-  ) {}
+  isLoading = signal(false);
 
   async ngOnInit() {
     this.isLoading.set(true);

@@ -1,5 +1,4 @@
-// storefront/src/app/services/medusa-api.service.ts
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { BehaviorSubject, Observable, throwError } from 'rxjs';
 import { map, catchError } from 'rxjs/operators';
@@ -20,12 +19,10 @@ import {
   providedIn: 'root',
 })
 export class MedusaApiService {
-  private currentRegion$ = new BehaviorSubject<Region | null>(null);
+  private http = inject(HttpClient);
+  private configService = inject(ConfigService);
 
-  constructor(
-    private http: HttpClient,
-    private configService: ConfigService,
-  ) {}
+  private currentRegion$ = new BehaviorSubject<Region | null>(null);
 
   private get apiBaseUrl(): string {
     return this.configService.medusaApiUrl;

@@ -1,5 +1,4 @@
-// src/app/services/config.service.ts
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, BehaviorSubject } from 'rxjs';
 import { tap, catchError } from 'rxjs/operators';
@@ -14,11 +13,11 @@ export interface AppConfig {
   providedIn: 'root',
 })
 export class ConfigService {
+  private http = inject(HttpClient);
+
   private config: AppConfig | null = null;
   private configSubject = new BehaviorSubject<AppConfig | null>(null);
   public config$ = this.configSubject.asObservable();
-
-  constructor(private http: HttpClient) {}
 
   loadConfig(): Observable<AppConfig> {
     return this.http.get<AppConfig>('./assets/config/environment.json').pipe(

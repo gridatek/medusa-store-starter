@@ -1,5 +1,4 @@
-// storefront/src/app/pages/checkout.component.ts
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject } from '@angular/core';
 
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -562,6 +561,11 @@ interface ShippingOption {
   styles: [],
 })
 export class CheckoutComponent implements OnInit, OnDestroy {
+  private cartService = inject(CartService);
+  private authService = inject(AuthService);
+  private medusaApi = inject(MedusaApiService);
+  private router = inject(Router);
+
   cart: Cart | null = null;
   currentCustomer: Customer | null = null;
   currentStep = 'contact';
@@ -618,13 +622,6 @@ export class CheckoutComponent implements OnInit, OnDestroy {
   selectedPaymentMethod = 'card';
 
   private subscriptions = new Subscription();
-
-  constructor(
-    private cartService: CartService,
-    private authService: AuthService,
-    private medusaApi: MedusaApiService,
-    private router: Router,
-  ) {}
 
   ngOnInit(): void {
     this.subscriptions.add(

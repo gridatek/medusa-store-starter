@@ -1,5 +1,4 @@
-// storefront/src/app/pages/product-detail.component.ts
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject } from '@angular/core';
 
 import { ActivatedRoute } from '@angular/router';
 import { Subscription } from 'rxjs';
@@ -308,6 +307,10 @@ import {
   styles: [],
 })
 export class ProductDetailComponent implements OnInit, OnDestroy {
+  private route = inject(ActivatedRoute);
+  private medusaApi = inject(MedusaApiService);
+  private cartService = inject(CartService);
+
   product: Product | null = null;
   selectedVariant: ProductVariant | null = null;
   selectedOptions: { [optionId: string]: string } = {};
@@ -319,12 +322,6 @@ export class ProductDetailComponent implements OnInit, OnDestroy {
   isAddingToCart = false;
 
   private subscriptions = new Subscription();
-
-  constructor(
-    private route: ActivatedRoute,
-    private medusaApi: MedusaApiService,
-    private cartService: CartService,
-  ) {}
 
   ngOnInit(): void {
     this.subscriptions.add(

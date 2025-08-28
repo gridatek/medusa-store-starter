@@ -1,5 +1,4 @@
-// storefront/src/app/services/cart.service.ts
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { tap, switchMap } from 'rxjs/operators';
 import { MedusaApiService } from './medusa-api.service';
@@ -9,6 +8,8 @@ import { Cart, CartSummary, STORAGE_KEYS, calculateCartTotals } from '../../../.
   providedIn: 'root',
 })
 export class CartService {
+  private medusaApi = inject(MedusaApiService);
+
   private cart$ = new BehaviorSubject<Cart | null>(null);
   private cartSummary$ = new BehaviorSubject<CartSummary>({
     subtotal: 0,
@@ -18,8 +19,6 @@ export class CartService {
     total: 0,
     itemCount: 0,
   });
-
-  constructor(private medusaApi: MedusaApiService) {}
 
   async initializeCart(): Promise<void> {
     try {
