@@ -1,4 +1,13 @@
-import { Component, OnInit, OnDestroy, inject, signal, WritableSignal } from '@angular/core';
+import {
+  Component,
+  OnInit,
+  OnDestroy,
+  inject,
+  signal,
+  WritableSignal,
+  Signal,
+  computed,
+} from '@angular/core';
 
 import { RouterModule, ActivatedRoute, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -461,7 +470,7 @@ export class ProductsComponent implements OnInit, OnDestroy {
     }
   }
 
-  private buildApiParams(): any {
+  private readonly buildApiParams: Signal<any> = computed(() => {
     const params: any = {
       limit: ITEMS_PER_PAGE,
       offset: (this.currentPage - 1) * ITEMS_PER_PAGE,
@@ -484,7 +493,7 @@ export class ProductsComponent implements OnInit, OnDestroy {
     }
 
     return params;
-  }
+  });
 
   private async loadCollections(): Promise<void> {
     // In a real implementation, you'd have a collections endpoint
