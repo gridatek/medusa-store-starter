@@ -1,21 +1,21 @@
-import { Component, OnInit, OnDestroy, inject, Signal, computed, signal } from '@angular/core';
+import { Component, OnDestroy, OnInit, Signal, computed, inject, signal } from '@angular/core';
 
+import { toSignal } from '@angular/core/rxjs-interop';
 import { RouterModule } from '@angular/router';
 import { Subject, Subscription } from 'rxjs';
-import { debounceTime, distinctUntilChanged, startWith, switchMap } from 'rxjs/operators';
-import { CartService } from '../services/cart.service';
-import { MedusaApiService } from '../services/medusa-api.service';
-import { AuthService } from '../services/auth.service';
+import { debounceTime, distinctUntilChanged, startWith } from 'rxjs/operators';
 import {
-  Product,
   CartSummary,
   Customer,
+  Product,
   SEARCH_DEBOUNCE_TIME,
   formatPrice,
   getProductPrice,
 } from '../../../../shared/src/types';
+import { AuthService } from '../services/auth.service';
+import { CartService } from '../services/cart.service';
+import { MedusaApiService } from '../services/medusa-api.service';
 import { AuthModalComponent } from './auth-modal.component';
-import { toSignal } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'app-header',
