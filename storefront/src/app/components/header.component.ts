@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, inject, Signal, computed } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject, Signal, computed, signal } from '@angular/core';
 
 import { RouterModule } from '@angular/router';
 import { Subject, Subscription } from 'rxjs';
@@ -113,7 +113,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
             </div>
 
             <!-- Search Results Dropdown -->
-            @if (showSearchResults && (searchResults.length > 0 || showNoResults)) {
+            @if (showSearchResults() && (searchResults().length > 0 || showNoResults())) {
               <div
                 data-testid="search-results"
                 class="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-96 overflow-y-auto z-50"
@@ -156,7 +156,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
                   </div>
                 }
                 <!-- No Results -->
-                @if (searchResults.length === 0 && showNoResults) {
+                @if (searchResults().length === 0 && showNoResults()) {
                   <div data-testid="no-results-message" class="px-4 py-8 text-center">
                     <div class="text-gray-400 mb-2">
                       <svg
@@ -332,7 +332,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
       }
 
       <!-- Search Results Overlay -->
-      @if (showSearchResults) {
+      @if (showSearchResults()) {
         <div class="fixed inset-0 z-40 bg-transparent" (click)="closeSearchResults()"></div>
       }
     </header>
@@ -364,8 +364,10 @@ export class HeaderComponent implements OnInit, OnDestroy {
     () => this.productsResource.value()?.products || [],
   );
 
-  showSearchResults = false;
-  showNoResults = false;
+  protected readonly showSearchResults = signal(false);
+  protected readonly showNoResults = computed(
+    () => this.searchResults().length === 0 || !!this.productsResource.error(),
+  );
   protected readonly isSearchLoading = computed(() => this.productsResource.isLoading());
   showMobileMenu = false;
   showAuthModal = false;
@@ -433,7 +435,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
     this.searchQuery = target.value;
 
     if (this.searchQuery.trim()) {
-      this.showSearchResults = true;
+      this.showSearchResults.set(true);
       this.searchSubject.next(this.searchQuery.trim());
     } else {
       this.clearSearch();
@@ -441,15 +443,15 @@ export class HeaderComponent implements OnInit, OnDestroy {
   }
 
   onSearchFocus(): void {
-    if (this.searchResults.length > 0 || this.showNoResults) {
-      this.showSearchResults = true;
+    if (this.searchResults().length > 0 || this.showNoResults()) {
+      this.showSearchResults.set(true);
     }
   }
 
   onSearchBlur(): void {
     // Delay hiding results to allow for clicks
     setTimeout(() => {
-      this.showSearchResults = false;
+      this.showSearchResults.set(false);
     }, 200);
   }
 
@@ -459,14 +461,14 @@ export class HeaderComponent implements OnInit, OnDestroy {
   }
 
   closeSearchResults(): void {
-    this.showSearchResults = false;
+    this.showSearchResults.set(false);
   }
 
   protected clearSearch(): void {
     this.productsResource.set(undefined);
     // this.searchResults = [];
-    this.showSearchResults = false;
-    this.showNoResults = false;
+    this.showSearchResults.set(false);
+    // this.showNoResults = false;
     // this.isSearchLoading = false;
   }
 
