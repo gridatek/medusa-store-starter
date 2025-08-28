@@ -8,10 +8,10 @@ import {
   LoginCredentials,
   RegisterData,
   AuthResponse,
-  API_BASE_URL,
   ENDPOINTS,
   STORAGE_KEYS,
 } from '../../../../shared/src/types';
+import { ConfigService } from './config.service';
 
 @Injectable({
   providedIn: 'root',
@@ -20,8 +20,12 @@ export class AuthService {
   private currentCustomer$ = new BehaviorSubject<Customer | null>(null);
   private isAuthenticated$ = new BehaviorSubject<boolean>(false);
 
-  constructor() {
+  constructor(private configService: ConfigService) {
     this.checkAuthState();
+  }
+
+  private get apiBaseUrl(): string {
+    return this.configService.medusaApiUrl;
   }
 
   private async checkAuthState(): Promise<void> {
@@ -40,7 +44,7 @@ export class AuthService {
   }
 
   login(credentials: LoginCredentials): Observable<Customer> {
-    const url = `${API_BASE_URL}${ENDPOINTS.AUTH.LOGIN}`;
+    const url = `${this.apiBaseUrl}${ENDPOINTS.AUTH.LOGIN}`;
 
     return from(
       fetch(url, {
@@ -75,7 +79,7 @@ export class AuthService {
   }
 
   register(registerData: RegisterData): Observable<Customer> {
-    const url = `${API_BASE_URL}${ENDPOINTS.CUSTOMERS}`;
+    const url = `${this.apiBaseUrl}${ENDPOINTS.CUSTOMERS}`;
 
     return from(
       fetch(url, {
@@ -102,7 +106,7 @@ export class AuthService {
   }
 
   logout(): Observable<void> {
-    const url = `${API_BASE_URL}${ENDPOINTS.AUTH.LOGOUT}`;
+    const url = `${this.apiBaseUrl}${ENDPOINTS.AUTH.LOGOUT}`;
     const token = this.getTokenFromStorage();
 
     return from(
@@ -124,7 +128,7 @@ export class AuthService {
   }
 
   getCurrentCustomer(): Observable<Customer> {
-    const url = `${API_BASE_URL}${ENDPOINTS.AUTH.CUSTOMER}`;
+    const url = `${this.apiBaseUrl}${ENDPOINTS.AUTH.CUSTOMER}`;
     const token = this.getTokenFromStorage();
 
     if (!token) {
