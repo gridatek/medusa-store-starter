@@ -68,7 +68,7 @@ interface FilterState {
                         type="checkbox"
                         [id]="'collection-' + collection.id"
                         [value]="collection.id"
-                        [checked]="selectedCollections.includes(collection.id)"
+                        [checked]="selectedCollections().includes(collection.id)"
                         (change)="onCollectionChange(collection.id, $event)"
                         class="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300 rounded"
                       />
@@ -412,7 +412,7 @@ export class ProductsComponent implements OnInit, OnDestroy {
 
   // Filter states
   protected readonly searchQuery = signal('');
-  selectedCollections: string[] = [];
+  selectedCollections: WritableSignal<string[]> = signal([]);
   selectedTypes: string[] = [];
   protected readonly selectedTags: WritableSignal<string[]> = signal([]);
   priceRange = { min: null as number | null, max: null as number | null };
@@ -471,8 +471,8 @@ export class ProductsComponent implements OnInit, OnDestroy {
       params.q = this.searchQuery();
     }
 
-    if (this.selectedCollections.length > 0) {
-      params.collection_id = this.selectedCollections;
+    if (this.selectedCollections().length > 0) {
+      params.collection_id = this.selectedCollections();
     }
 
     if (this.selectedTypes.length > 0) {
@@ -508,9 +508,14 @@ export class ProductsComponent implements OnInit, OnDestroy {
 
   onCollectionChange(collectionId: string, event: any): void {
     if (event.target.checked) {
-      this.selectedCollections.push(collectionId);
+      this.selectedCollections.update((selectedCollections) => [
+        ...selectedCollections,
+        collectionId,
+      ]);
     } else {
-      this.selectedCollections = this.selectedCollections.filter((id) => id !== collectionId);
+      this.selectedCollections.update((selectedCollections) =>
+        selectedCollections.filter((id) => id !== collectionId),
+      );
     }
     this.currentPage = 1;
     this.loadProducts();
@@ -548,7 +553,7 @@ export class ProductsComponent implements OnInit, OnDestroy {
 
   clearAllFilters(): void {
     this.searchQuery.set('');
-    this.selectedCollections = [];
+    this.selectedCollections.set([]);
     this.selectedTypes = [];
     this.selectedTags.set([]);
     this.priceRange = { min: null, max: null };
