@@ -13,10 +13,10 @@ export interface AppConfig {
   providedIn: 'root',
 })
 export class ConfigService {
-  private http = inject(HttpClient);
+  private readonly http = inject(HttpClient);
 
   private config: AppConfig | null = null;
-  private configSubject = new BehaviorSubject<AppConfig | null>(null);
+  private readonly configSubject = new BehaviorSubject<AppConfig | null>(null);
   public config$ = this.configSubject.asObservable();
 
   loadConfig(): Observable<AppConfig> {
