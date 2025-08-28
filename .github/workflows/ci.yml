@@ -99,6 +99,7 @@ jobs:
           echo $! > ../backend.pid
         env:
           NODE_ENV: development
+          REDIS_URL: redis://localhost:6379
 
       - name: Wait for backend to be ready
         run: |
