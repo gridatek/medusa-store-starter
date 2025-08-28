@@ -157,50 +157,37 @@ jobs:
 
           echo "Admin authenticated successfully, token length: ${#ACCESS_TOKEN}"
 
+
           # Get existing publishable API keys
           echo "Getting existing publishable API keys..."
-          echo "Getting existing publishable API keys..."
-          KEYS_RESPONSE=$(curl -s -w "\nHTTP_CODE:%{http_code}" -X GET "$BACKEND_URL/admin/api-keys" \
-            -H "Authorization: Bearer $ACCESS_TOKEN" 2>&1)
-
-          echo "Keys response: $KEYS_RESPONSE"
+          KEYS_RESPONSE=$(curl -s -w "\nHTTP_CODE:%{http_code}" -X GET "$BACKEND_URL/admin/publishable-api-keys" \
+            -H "Authorization: Bearer $ACCESS_TOKEN")
+            
+            echo "Keys response: $KEYS_RESPONSE"
             
             # Check if the request was successful
             HTTP_CODE=$(echo "$KEYS_RESPONSE" | grep -o "HTTP_CODE:[0-9]*" | cut -d: -f2)
               if [ "$HTTP_CODE" != "200" ]; then
-                echo "Failed to get API keys with HTTP code: $HTTP_CODE"
-                echo "Full response: $KEYS_RESPONSE"
+            echo "Failed to get publishable API keys with HTTP code: $HTTP_CODE"
+            echo "Full response: $(echo "$KEYS_RESPONSE" | head -n -1)"
               exit 1
               fi
               
               # Extract the first publishable API key token
+              # The response should have publishable_api_keys array with objects containing id and token
               PUBLISHABLE_KEY=$(echo "$KEYS_RESPONSE" | grep -o '"token":"pk_[^"]*"' | head -n1 | cut -d'"' -f4)
               
               if [ -n "$PUBLISHABLE_KEY" ]; then
-                echo "Using existing publishable key: ${PUBLISHABLE_KEY:0:20}..."
+            echo "Using existing publishable key: ${PUBLISHABLE_KEY:0:20}..."
               else
-                echo "No existing publishable API key found in response."
-                echo "Available keys in response: $(echo "$KEYS_RESPONSE" | head -n -1)"
-                echo "You may need to create one first."
-                exit 1
+              echo "No publishable API keys found."
+            echo "Response data: $(echo "$KEYS_RESPONSE" | head -n -1)"
+              echo "You need to create a publishable API key first via the admin dashboard."
+              exit 1
               fi
 
 
 
-          # Get existing publishable API keys
-          echo "Getting existing publishable API keys..."
-          KEYS_RESPONSE=$(curl -s -X GET "$BACKEND_URL/admin/api-keys" \
-            -H "Authorization: Bearer $ACCESS_TOKEN")
-
-            # Extract the first publishable API key token
-            PUBLISHABLE_KEY=$(echo "$KEYS_RESPONSE" | grep -o '"token":"pk_[^"]*"' | head -n1 | cut -d'"' -f4)
-            
-            if [ -n "$PUBLISHABLE_KEY" ]; then
-                echo "Using existing publishable key: ${PUBLISHABLE_KEY:0:20}..."
-            else
-              echo "No existing publishable API key found. You may need to create one via the admin dashboard."
-              exit 1
-            fi
             
             echo "Generated publishable key: $PUBLISHABLE_KEY"
             echo "PUBLISHABLE_API_KEY=$PUBLISHABLE_KEY" >> $GITHUB_ENV
