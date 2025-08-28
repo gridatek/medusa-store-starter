@@ -157,68 +157,34 @@ jobs:
 
           echo "Admin authenticated successfully, token length: ${#ACCESS_TOKEN}"
 
-          # Rest of your API key creation logic...
-
-      - name: Generate Publishable API Key via Admin API
-        working-directory: ./backend
-        run: |
-          echo "Generating publishable API key via Admin API..."
-
-          # First, authenticate with admin API
-          echo "Authenticating admin user..."
-          AUTH_RESPONSE=$(curl -s -w "\nHTTP_CODE:%{http_code}" -X POST http://localhost:9000/admin/auth \
-            -H "Content-Type: application/json" \
-            -d '{"email": "admin@github-ci.com", "password": "ci-test-password-${{ github.run_id }}"}')
-
-          echo "Auth response: $AUTH_RESPONSE"
-
-          # Check if authentication was successful
-          HTTP_CODE=$(echo "$AUTH_RESPONSE" | grep -o "HTTP_CODE:[0-9]*" | cut -d: -f2)
-          if [ "$HTTP_CODE" != "200" ]; then
-            echo "Authentication failed with HTTP code: $HTTP_CODE"
-            echo "Full response: $AUTH_RESPONSE"
-            exit 1
-          fi
-
-          # Extract access token
-          ACCESS_TOKEN=$(echo "$AUTH_RESPONSE" | grep -o '"access_token":"[^"]*"' | cut -d'"' -f4)
-
-          if [ -z "$ACCESS_TOKEN" ]; then
-            echo "Failed to extract access token from response"
-            echo "Full response: $AUTH_RESPONSE"
-            exit 1
-          fi
-
-          echo "Admin authenticated successfully, token length: ${#ACCESS_TOKEN}"
-
           # Create publishable API key
           echo "Creating publishable API key..."
           KEY_RESPONSE=$(curl -s -w "\nHTTP_CODE:%{http_code}" -X POST http://localhost:9000/admin/publishable-api-keys \
             -H "Content-Type: application/json" \
             -H "Authorization: Bearer $ACCESS_TOKEN" \
             -d '{"title": "CI Test Key"}')
-
-          echo "Key creation response: $KEY_RESPONSE"
-
-          # Check if key creation was successful
-          HTTP_CODE=$(echo "$KEY_RESPONSE" | grep -o "HTTP_CODE:[0-9]*" | cut -d: -f2)
-          if [ "$HTTP_CODE" != "200" ] && [ "$HTTP_CODE" != "201" ]; then
-            echo "Key creation failed with HTTP code: $HTTP_CODE"
+            
+            echo "Key creation response: $KEY_RESPONSE"
+            
+            # Check if key creation was successful
+            HTTP_CODE=$(echo "$KEY_RESPONSE" | grep -o "HTTP_CODE:[0-9]*" | cut -d: -f2)
+            if [ "$HTTP_CODE" != "200" ] && [ "$HTTP_CODE" != "201" ]; then
+              echo "Key creation failed with HTTP code: $HTTP_CODE"
+              echo "Full response: $KEY_RESPONSE"
+              exit 1
+            fi
+            
+            # Extract the publishable key
+            PUBLISHABLE_KEY=$(echo "$KEY_RESPONSE" | grep -o '"id":"pk_[^"]*"' | cut -d'"' -f4)
+              
+              if [ -z "$PUBLISHABLE_KEY" ]; then
+              echo "Failed to extract publishable API key from response"
             echo "Full response: $KEY_RESPONSE"
-            exit 1
-          fi
-
-          # Extract the publishable key
-          PUBLISHABLE_KEY=$(echo "$KEY_RESPONSE" | grep -o '"id":"pk_[^"]*"' | cut -d'"' -f4)
-
-          if [ -z "$PUBLISHABLE_KEY" ]; then
-            echo "Failed to extract publishable API key from response"
-            echo "Full response: $KEY_RESPONSE"
-            exit 1
-          fi
-
-          echo "Generated publishable key: $PUBLISHABLE_KEY"
-          echo "PUBLISHABLE_API_KEY=$PUBLISHABLE_KEY" >> $GITHUB_ENV
+              exit 1
+              fi
+            
+            echo "Generated publishable key: $PUBLISHABLE_KEY"
+            echo "PUBLISHABLE_API_KEY=$PUBLISHABLE_KEY" >> $GITHUB_ENV
 
       - name: Create storefront config
         working-directory: ./storefront
