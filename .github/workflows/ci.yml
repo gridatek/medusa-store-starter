@@ -108,8 +108,9 @@ jobs:
           npm run start &
           echo $! > ../backend.pid
         env:
-          NODE_ENV: development
+          DATABASE_URL: postgres://postgres:postgres@localhost:5432/medusa-store
           REDIS_URL: redis://localhost:6379
+          NODE_ENV: development
 
       - name: Wait for backend to be ready
         run: |
