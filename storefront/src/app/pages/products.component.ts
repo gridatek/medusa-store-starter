@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, inject, signal } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject, signal, WritableSignal } from '@angular/core';
 
 import { RouterModule, ActivatedRoute, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -148,9 +148,9 @@ interface FilterState {
                   @for (tag of tags; track tag) {
                     <button
                       class="px-2 py-1 text-xs border border-gray-300 rounded-full hover:border-blue-300 transition-colors"
-                      [class.bg-blue-100]="selectedTags.includes(tag.id)"
-                      [class.border-blue-500]="selectedTags.includes(tag.id)"
-                      [class.text-blue-700]="selectedTags.includes(tag.id)"
+                      [class.bg-blue-100]="selectedTags().includes(tag.id)"
+                      [class.border-blue-500]="selectedTags().includes(tag.id)"
+                      [class.text-blue-700]="selectedTags().includes(tag.id)"
                       (click)="toggleTag(tag.id)"
                     >
                       {{ tag.value }}
@@ -414,7 +414,7 @@ export class ProductsComponent implements OnInit, OnDestroy {
   protected readonly searchQuery = signal('');
   selectedCollections: string[] = [];
   selectedTypes: string[] = [];
-  selectedTags: string[] = [];
+  protected readonly selectedTags: WritableSignal<string[]> = signal([]);
   priceRange = { min: null as number | null, max: null as number | null };
   sortBy = '';
 
@@ -527,10 +527,10 @@ export class ProductsComponent implements OnInit, OnDestroy {
   }
 
   toggleTag(tagId: string): void {
-    if (this.selectedTags.includes(tagId)) {
-      this.selectedTags = this.selectedTags.filter((id) => id !== tagId);
+    if (this.selectedTags().includes(tagId)) {
+      this.selectedTags.set(this.selectedTags().filter((id) => id !== tagId));
     } else {
-      this.selectedTags.push(tagId);
+      this.selectedTags().push(tagId);
     }
     this.currentPage = 1;
     this.loadProducts();
@@ -550,7 +550,7 @@ export class ProductsComponent implements OnInit, OnDestroy {
     this.searchQuery.set('');
     this.selectedCollections = [];
     this.selectedTypes = [];
-    this.selectedTags = [];
+    this.selectedTags.set([]);
     this.priceRange = { min: null, max: null };
     this.sortBy = '';
     this.currentPage = 1;
