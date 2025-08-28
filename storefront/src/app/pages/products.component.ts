@@ -448,7 +448,7 @@ export class ProductsComponent implements OnInit, OnDestroy {
     this.hasError = false;
 
     try {
-      const params = this.buildApiParams();
+      const params = this.computeApiParams();
 
       this.medusaApi.getProducts(params).subscribe({
         next: (products) => {
@@ -470,7 +470,7 @@ export class ProductsComponent implements OnInit, OnDestroy {
     }
   }
 
-  private readonly buildApiParams: Signal<any> = computed(() => {
+  private readonly computeApiParams: Signal<any> = computed(() => {
     const params: any = {
       limit: ITEMS_PER_PAGE,
       offset: (this.currentPage - 1) * ITEMS_PER_PAGE,
