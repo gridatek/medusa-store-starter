@@ -88,6 +88,16 @@ jobs:
           npm run seed || echo "No seed script found, skipping..."
         continue-on-error: true
 
+      - name: Verify services are ready
+        run: |
+          echo "Checking Redis connection..."
+          timeout 30s bash -c 'until redis-cli -h localhost -p 6379 ping; do echo "Waiting for Redis..."; sleep 2; done'
+
+          echo "Checking PostgreSQL connection..."
+          timeout 30s bash -c 'until pg_isready -h localhost -p 5432 -U postgres; do echo "Waiting for PostgreSQL..."; sleep 2; done'
+
+          echo "✅ All services are ready!"
+
       - name: Create Admin User
         working-directory: ./backend
         run: |
