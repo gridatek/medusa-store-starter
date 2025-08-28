@@ -105,9 +105,9 @@ export class MedusaApiService {
     );
   }
 
-  // searchProducts(query: string): Observable<Product[]> {
-  //   return this.getProducts({ q: query, limit: 10 });
-  // }
+  searchProducts(query: string) {
+    return this.getProducts({ q: query, limit: 10 });
+  }
 
   // Regions
   getRegions(): Observable<Region[]> {

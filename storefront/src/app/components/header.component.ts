@@ -1,8 +1,8 @@
-import { Component, OnInit, OnDestroy, inject } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject, Signal, computed } from '@angular/core';
 
 import { RouterModule } from '@angular/router';
 import { Subject, Subscription } from 'rxjs';
-import { debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
+import { debounceTime, distinctUntilChanged, startWith, switchMap } from 'rxjs/operators';
 import { CartService } from '../services/cart.service';
 import { MedusaApiService } from '../services/medusa-api.service';
 import { AuthService } from '../services/auth.service';
@@ -15,6 +15,7 @@ import {
   getProductPrice,
 } from '../../../../shared/src/types';
 import { AuthModalComponent } from './auth-modal.component';
+import { toSignal } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'app-header',
@@ -118,9 +119,9 @@ import { AuthModalComponent } from './auth-modal.component';
                 class="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-96 overflow-y-auto z-50"
               >
                 <!-- Results -->
-                @if (searchResults.length > 0) {
+                @if (searchResults().length > 0) {
                   <div class="py-2">
-                    @for (product of searchResults; track trackByProductId($index, product)) {
+                    @for (product of searchResults(); track product.id) {
                       <div
                         data-testid="search-result-item"
                         class="px-4 py-3 hover:bg-gray-50 cursor-pointer border-b border-gray-100 last:border-b-0"
@@ -339,12 +340,30 @@ import { AuthModalComponent } from './auth-modal.component';
   styles: [],
 })
 export class HeaderComponent implements OnInit, OnDestroy {
-  private cartService = inject(CartService);
-  private medusaApi = inject(MedusaApiService);
-  private authService = inject(AuthService);
+  private readonly cartService = inject(CartService);
+  private readonly medusaApi = inject(MedusaApiService);
+  private readonly authService = inject(AuthService);
+
+  private readonly searchSubject = new Subject<string>();
+  private readonly subscriptions = new Subscription();
+
+  private readonly debouncedSearchQuery = toSignal(
+    this.searchSubject.pipe(
+      debounceTime(SEARCH_DEBOUNCE_TIME),
+      distinctUntilChanged(),
+      startWith(''), // Provide initial value
+    ),
+    { initialValue: '' },
+  );
+
+  private readonly productsResource = this.medusaApi.searchProducts(this.debouncedSearchQuery());
 
   searchQuery = '';
-  searchResults: Product[] = [];
+
+  protected readonly searchResults: Signal<Product[]> = computed(
+    () => this.productsResource.value()?.products || [],
+  );
+
   showSearchResults = false;
   showNoResults = false;
   isSearchLoading = false;
@@ -360,38 +379,35 @@ export class HeaderComponent implements OnInit, OnDestroy {
     itemCount: 0,
   };
 
-  private searchSubject = new Subject<string>();
-  private subscriptions = new Subscription();
-
   ngOnInit(): void {
     // Setup search debouncing
-    this.subscriptions.add(
-      this.searchSubject
-        .pipe(
-          debounceTime(SEARCH_DEBOUNCE_TIME),
-          distinctUntilChanged(),
-          switchMap((query) => {
-            if (query.length < 2) {
-              return [];
-            }
-            this.isSearchLoading = true;
-            return this.medusaApi.searchProducts(query);
-          }),
-        )
-        .subscribe({
-          next: (products) => {
-            this.searchResults = products;
-            this.showNoResults = products.length === 0;
-            this.isSearchLoading = false;
-          },
-          error: (error) => {
-            console.error('Search error:', error);
-            this.searchResults = [];
-            this.showNoResults = true;
-            this.isSearchLoading = false;
-          },
-        }),
-    );
+    // this.subscriptions.add(
+    //   this.searchSubject
+    //     .pipe(
+    //       debounceTime(SEARCH_DEBOUNCE_TIME),
+    //       distinctUntilChanged(),
+    //       switchMap((query) => {
+    //         if (query.length < 2) {
+    //           return [];
+    //         }
+    //         this.isSearchLoading = true;
+    //         return this.medusaApi.searchProducts(query);
+    //       }),
+    //     )
+    //     .subscribe({
+    //       next: (products) => {
+    //         this.searchResults = products;
+    //         this.showNoResults = products.length === 0;
+    //         this.isSearchLoading = false;
+    //       },
+    //       error: (error) => {
+    //         console.error('Search error:', error);
+    //         this.searchResults = [];
+    //         this.showNoResults = true;
+    //         this.isSearchLoading = false;
+    //       },
+    //     }),
+    // );
 
     // Subscribe to cart updates
     this.subscriptions.add(
@@ -447,7 +463,8 @@ export class HeaderComponent implements OnInit, OnDestroy {
   }
 
   clearSearch(): void {
-    this.searchResults = [];
+    this.productsResource.set(undefined);
+    // this.searchResults = [];
     this.showSearchResults = false;
     this.showNoResults = false;
     this.isSearchLoading = false;
@@ -486,9 +503,5 @@ export class HeaderComponent implements OnInit, OnDestroy {
   getFormattedPrice(product: Product): string {
     const price = getProductPrice(product);
     return price ? formatPrice(price.amount, price.currency_code) : 'Price not available';
-  }
-
-  trackByProductId(index: number, product: Product): string {
-    return product.id;
   }
 }
