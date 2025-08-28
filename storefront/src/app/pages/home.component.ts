@@ -1,4 +1,10 @@
-import { Component, OnInit, inject } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  OnInit,
+  ViewEncapsulation,
+  inject,
+} from '@angular/core';
 
 import { RouterModule } from '@angular/router';
 import { MedusaApiService } from '../services/medusa-api.service';
@@ -261,10 +267,12 @@ import { Product, formatPrice, getProductPrice } from '../../../../shared/src/ty
     </div>
   `,
   styles: [],
+  encapsulation: ViewEncapsulation.None,
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class HomeComponent implements OnInit {
-  private medusaApi = inject(MedusaApiService);
-  private cartService = inject(CartService);
+  private readonly medusaApi = inject(MedusaApiService);
+  private readonly cartService = inject(CartService);
 
   featuredProducts: Product[] = [];
   isLoading = true;

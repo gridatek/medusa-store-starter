@@ -187,7 +187,7 @@ interface FilterState {
           <div class="flex items-center justify-between mb-6">
             <div class="flex items-center space-x-4">
               <p class="text-sm text-gray-500">
-                {{ totalProducts }} product{{ totalProducts !== 1 ? 's' : '' }} found
+                {{ totalProducts() }} product{{ totalProducts() !== 1 ? 's' : '' }} found
               </p>
             </div>
 
@@ -352,7 +352,7 @@ interface FilterState {
           }
 
           <!-- Pagination -->
-          @if (totalPages > 1) {
+          @if (totalPages() > 1) {
             <div data-testid="pagination" class="mt-12 flex justify-center">
               <nav class="flex items-center space-x-2">
                 <button
@@ -380,7 +380,7 @@ interface FilterState {
                 <button
                   data-testid="pagination-next"
                   class="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50"
-                  [disabled]="currentPage() === totalPages"
+                  [disabled]="currentPage() === totalPages()"
                   (click)="goToPage(currentPage() + 1)"
                 >
                   Next
@@ -446,8 +446,8 @@ export class ProductsComponent implements OnInit, OnDestroy {
   productTypes: ProductType[] = [];
   tags: ProductTag[] = [];
 
-  totalProducts = 0;
-  totalPages = 0;
+  protected readonly totalProducts = computed(() => this.productsResource.value()?.count || 0);
+  protected readonly totalPages = computed(() => Math.ceil(this.totalProducts() / ITEMS_PER_PAGE));
   protected readonly currentPage = signal(1);
   protected readonly isLoading = computed(() => this.productsResource.isLoading());
   protected readonly hasError = computed(() => !!this.productsResource.error());
@@ -585,7 +585,7 @@ export class ProductsComponent implements OnInit, OnDestroy {
   }
 
   goToPage(page: number): void {
-    if (page >= 1 && page <= this.totalPages) {
+    if (page >= 1 && page <= this.totalPages()) {
       this.currentPage.set(page);
       // this.loadProducts();
       window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -597,7 +597,7 @@ export class ProductsComponent implements OnInit, OnDestroy {
     const maxVisible = 5;
 
     let start = Math.max(1, this.currentPage() - Math.floor(maxVisible / 2));
-    let end = Math.min(this.totalPages, start + maxVisible - 1);
+    let end = Math.min(this.totalPages(), start + maxVisible - 1);
 
     if (end - start < maxVisible - 1) {
       start = Math.max(1, end - maxVisible + 1);

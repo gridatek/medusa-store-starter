@@ -1,4 +1,11 @@
-import { Component, OnInit, signal, inject } from '@angular/core';
+import {
+  Component,
+  OnInit,
+  signal,
+  inject,
+  ViewEncapsulation,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 
 import { RouterOutlet } from '@angular/router';
 import { HeaderComponent } from './components/header.component';
@@ -35,10 +42,12 @@ import { CartService } from './services/cart.service';
     </div>
   `,
   styles: [],
+  encapsulation: ViewEncapsulation.None,
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class App implements OnInit {
-  private medusaApi = inject(MedusaApiService);
-  private cartService = inject(CartService);
+  private readonly medusaApi = inject(MedusaApiService);
+  private readonly cartService = inject(CartService);
 
   isLoading = signal(false);
 
@@ -49,7 +58,7 @@ export class App implements OnInit {
       // Initialize app data
       await this.medusaApi.initializeRegion();
       await this.cartService.initializeCart();
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error initializing app:', error);
     } finally {
       this.isLoading.set(false);

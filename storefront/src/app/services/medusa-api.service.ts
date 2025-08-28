@@ -19,10 +19,10 @@ import { ConfigService } from './config.service';
   providedIn: 'root',
 })
 export class MedusaApiService {
-  private http = inject(HttpClient);
-  private configService = inject(ConfigService);
+  private readonly http = inject(HttpClient);
+  private readonly configService = inject(ConfigService);
 
-  private currentRegion$ = new BehaviorSubject<Region | null>(null);
+  private readonly currentRegion$ = new BehaviorSubject<Region | null>(null);
 
   private get apiBaseUrl(): string {
     return this.configService.medusaApiUrl;
