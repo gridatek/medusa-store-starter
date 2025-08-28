@@ -186,7 +186,7 @@ import { AuthModalComponent } from './auth-modal.component';
             [isOpen]="showAuthModal"
             (closeEvent)="closeAuthModal()"
             (authSuccess)="onAuthSuccess()"
-          ></app-auth-modal>
+          />
 
           <!-- Right Side Actions -->
           <div class="flex items-center space-x-4">

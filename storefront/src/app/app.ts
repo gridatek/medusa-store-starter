@@ -12,13 +12,13 @@ import { CartService } from './services/cart.service';
   imports: [RouterOutlet, HeaderComponent, FooterComponent],
   template: `
     <div data-testid="app-root" class="min-h-screen flex flex-col bg-gray-50">
-      <app-header></app-header>
+      <app-header />
 
       <main class="flex-1">
-        <router-outlet></router-outlet>
+        <router-outlet />
       </main>
 
-      <app-footer></app-footer>
+      <app-footer />
 
       <!-- Loading overlay -->
       @if (isLoading()) {
