@@ -479,8 +479,8 @@ export class ProductsComponent implements OnInit, OnDestroy {
       params.type_id = this.selectedTypes;
     }
 
-    if (this.selectedTags.length > 0) {
-      params.tags = this.selectedTags;
+    if (this.selectedTags().length > 0) {
+      params.tags = this.selectedTags();
     }
 
     return params;
@@ -528,9 +528,9 @@ export class ProductsComponent implements OnInit, OnDestroy {
 
   toggleTag(tagId: string): void {
     if (this.selectedTags().includes(tagId)) {
-      this.selectedTags.set(this.selectedTags().filter((id) => id !== tagId));
+      this.selectedTags.update((selectedTags) => selectedTags.filter((id) => id !== tagId));
     } else {
-      this.selectedTags().push(tagId);
+      this.selectedTags.update((selectedTags) => [...selectedTags, tagId]);
     }
     this.currentPage = 1;
     this.loadProducts();
