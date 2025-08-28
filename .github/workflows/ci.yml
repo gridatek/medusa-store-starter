@@ -159,10 +159,11 @@ jobs:
 
           # Get existing publishable API keys
           echo "Getting existing publishable API keys..."
+          echo "Getting existing publishable API keys..."
           KEYS_RESPONSE=$(curl -s -w "\nHTTP_CODE:%{http_code}" -X GET "$BACKEND_URL/admin/api-keys" \
-            -H "Authorization: Bearer $ACCESS_TOKEN")
-            
-            echo "Keys response: $KEYS_RESPONSE"
+            -H "Authorization: Bearer $ACCESS_TOKEN" 2>&1)
+
+          echo "Keys response: $KEYS_RESPONSE"
             
             # Check if the request was successful
             HTTP_CODE=$(echo "$KEYS_RESPONSE" | grep -o "HTTP_CODE:[0-9]*" | cut -d: -f2)
