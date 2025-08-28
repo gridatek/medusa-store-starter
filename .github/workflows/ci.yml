@@ -53,7 +53,7 @@ jobs:
       - name: Setup Backend Environment
         run: |
           cd backend
-          cat > .env << EOF
+          cat > .env.development << EOF
           DATABASE_URL=postgres://postgres:postgres@localhost:5432/medusa-store
           REDIS_URL=redis://localhost:6379
           JWT_SECRET=test-secret-${{ github.run_id }}
@@ -62,14 +62,14 @@ jobs:
           PORT=9000
           EOF
 
-          echo "✅ Backend .env configuration created"
+          echo "✅ Backend .env.development configuration created"
 
       - name: Build and migrate backend
         run: |
           cd backend
 
-          echo "Current .env file:"
-          cat .env
+          echo "Current .env.development file:"
+          cat .env.development
 
           echo "Building backend..."
           npm run build
