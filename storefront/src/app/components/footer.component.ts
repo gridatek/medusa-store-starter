@@ -1,7 +1,4 @@
-// Footer Component
-// storefront/src/app/components/footer.component.ts
 import { Component } from '@angular/core';
-
 import { RouterModule } from '@angular/router';
 
 @Component({
