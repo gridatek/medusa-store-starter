@@ -1,17 +1,17 @@
 import { Injectable, inject } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
-import { tap, switchMap } from 'rxjs/operators';
-import { MedusaApiService } from './medusa-api.service';
+import { tap } from 'rxjs/operators';
 import { Cart, CartSummary, STORAGE_KEYS, calculateCartTotals } from '../../../../shared/src/types';
+import { MedusaApiService } from './medusa-api.service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class CartService {
-  private medusaApi = inject(MedusaApiService);
+  private readonly medusaApi = inject(MedusaApiService);
 
-  private cart$ = new BehaviorSubject<Cart | null>(null);
-  private cartSummary$ = new BehaviorSubject<CartSummary>({
+  private readonly cart$ = new BehaviorSubject<Cart | null>(null);
+  private readonly cartSummary$ = new BehaviorSubject<CartSummary>({
     subtotal: 0,
     shipping: 0,
     tax: 0,
