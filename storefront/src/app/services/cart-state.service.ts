@@ -1,11 +1,18 @@
 import { httpResource, HttpResourceRequest } from '@angular/common/http';
-import { computed, effect, Injectable, signal } from '@angular/core';
-import { Cart, STORAGE_KEYS } from '../../../../shared/src/types';
+import { computed, effect, inject, Injectable, signal } from '@angular/core';
+import { Cart, ENDPOINTS, STORAGE_KEYS } from '../../../../shared/src/types';
+import { ConfigService } from './config.service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class CartStateService {
+  private readonly configService = inject(ConfigService);
+
+  private get apiBaseUrl(): string {
+    return this.configService.medusaApiUrl;
+  }
+
   // Cart Id signal - the source of truth
   private readonly cartId = signal<string | null>(this.getStoredCartId());
 
@@ -17,8 +24,10 @@ export class CartStateService {
         return undefined; // Don't make request if no cart Id
       }
 
+      const url = `${this.apiBaseUrl}${ENDPOINTS.CART_BY_ID(id)}`;
+
       return {
-        url: `/api/cart/${id}`,
+        url: url,
         method: 'GET',
       } as HttpResourceRequest;
     },
