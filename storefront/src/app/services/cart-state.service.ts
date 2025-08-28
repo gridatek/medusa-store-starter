@@ -43,7 +43,6 @@ export class CartStateService {
   readonly cart = computed(() => this.cartResource.value() ?? null);
   readonly isLoading = computed(() => this.cartResource.isLoading());
   readonly error = computed(() => this.cartResource.error());
-  readonly cartId$ = this.cartId.asReadonly();
 
   constructor() {
     // Initialize cart if no cartId exists
