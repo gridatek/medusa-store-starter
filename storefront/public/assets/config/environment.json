@@ -1,5 +1,0 @@
-{
-  "name": "development",
-  "medusaApiUrl": "http://localhost:9000",
-  "medusaPublishableApiKey": "pk_your_publishable_key_here"
-}
