@@ -1,4 +1,4 @@
-import { Component, Output, EventEmitter, input, inject } from '@angular/core';
+import { Component, input, inject, output } from '@angular/core';
 
 import { FormsModule } from '@angular/forms';
 import { AuthService } from '../services/auth.service';
@@ -249,8 +249,8 @@ export class AuthModalComponent {
   private authService = inject(AuthService);
 
   readonly isOpen = input(false);
-  @Output() closeEvent = new EventEmitter<void>();
-  @Output() authSuccess = new EventEmitter<void>();
+  readonly closeEvent = output<void>();
+  readonly authSuccess = output<void>();
 
   isLoginMode = true;
   isLoading = false;
@@ -271,8 +271,10 @@ export class AuthModalComponent {
 
   closeModal(event?: Event): void {
     if (event && event.target === event.currentTarget) {
+      // TODO: The 'emit' function requires a mandatory void argument
       this.closeEvent.emit();
     } else if (!event) {
+      // TODO: The 'emit' function requires a mandatory void argument
       this.closeEvent.emit();
     }
   }
@@ -293,7 +295,9 @@ export class AuthModalComponent {
 
     try {
       await this.authService.login(this.loginData).toPromise();
+      // TODO: The 'emit' function requires a mandatory void argument
       this.authSuccess.emit();
+      // TODO: The 'emit' function requires a mandatory void argument
       this.closeEvent.emit();
     } catch (error: any) {
       this.errorMessage = error.message || 'Login failed. Please try again.';
@@ -316,7 +320,9 @@ export class AuthModalComponent {
         })
         .toPromise();
 
+      // TODO: The 'emit' function requires a mandatory void argument
       this.authSuccess.emit();
+      // TODO: The 'emit' function requires a mandatory void argument
       this.closeEvent.emit();
     } catch (error: any) {
       this.errorMessage = error.message || 'Registration failed. Please try again.';
