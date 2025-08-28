@@ -130,13 +130,34 @@ jobs:
         run: |
           echo "Generating publishable API key via Admin API..."
 
-          # Try the correct admin auth endpoint
-          echo "Testing admin authentication..."
-          AUTH_RESPONSE=$(curl -s -w "\nHTTP_CODE:%{http_code}" -X POST http://localhost:9000/admin/auth \
+          # Use the correct admin auth endpoint for Medusa v2
+          echo "Authenticating admin user with /auth/user/emailpass..."
+          AUTH_RESPONSE=$(curl -s -w "\nHTTP_CODE:%{http_code}" -X POST http://localhost:9000/auth/user/emailpass \
             -H "Content-Type: application/json" \
             -d '{"email": "admin@github-ci.com", "password": "ci-test-password-${{ github.run_id }}"}')
 
-          echo "Full auth response: $AUTH_RESPONSE"
+          echo "Auth response: $AUTH_RESPONSE"
+
+          # Check if authentication was successful
+          HTTP_CODE=$(echo "$AUTH_RESPONSE" | grep -o "HTTP_CODE:[0-9]*" | cut -d: -f2)
+          if [ "$HTTP_CODE" != "200" ]; then
+            echo "Authentication failed with HTTP code: $HTTP_CODE"
+            echo "Full response: $AUTH_RESPONSE"
+            exit 1
+          fi
+
+          # Extract access token (should be "token" field, not "access_token")
+          ACCESS_TOKEN=$(echo "$AUTH_RESPONSE" | grep -o '"token":"[^"]*"' | cut -d'"' -f4)
+
+          if [ -z "$ACCESS_TOKEN" ]; then
+            echo "Failed to extract token from response"
+            echo "Full response: $AUTH_RESPONSE"
+            exit 1
+          fi
+
+          echo "Admin authenticated successfully, token length: ${#ACCESS_TOKEN}"
+
+          # Rest of your API key creation logic...
 
       - name: Generate Publishable API Key via Admin API
         working-directory: ./backend
