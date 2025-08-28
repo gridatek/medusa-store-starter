@@ -246,7 +246,7 @@ interface FilterState {
           }
 
           <!-- Empty State -->
-          @if (!isLoading() && !hasError() && products.length === 0) {
+          @if (!isLoading() && !hasError() && products().length === 0) {
             <div class="text-center py-16">
               <div class="text-gray-400 mb-4">
                 <svg
@@ -269,7 +269,7 @@ interface FilterState {
           }
 
           <!-- Products Grid -->
-          @if (!isLoading() && !hasError() && products.length > 0) {
+          @if (!isLoading() && !hasError() && products().length > 0) {
             <div
               data-testid="product-grid"
               class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
@@ -411,6 +411,24 @@ export class ProductsComponent implements OnInit, OnDestroy {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
 
+  collections: ProductCollection[] = [];
+  productTypes: ProductType[] = [];
+  tags: ProductTag[] = [];
+
+  protected readonly currentPage = signal(1);
+
+  isAddingToCart: { [productId: string]: boolean } = {};
+
+  // Filter states
+  protected readonly searchQuery = signal('');
+  protected readonly selectedCollections: WritableSignal<string[]> = signal([]);
+  protected readonly selectedTypes: WritableSignal<string[]> = signal([]);
+  protected readonly selectedTags: WritableSignal<string[]> = signal([]);
+  priceRange = { min: null as number | null, max: null as number | null };
+  sortBy = '';
+
+  private readonly subscriptions = new Subscription();
+
   private readonly computeApiParams: Signal<any> = computed(() => {
     const params: any = {
       limit: ITEMS_PER_PAGE,
@@ -437,31 +455,13 @@ export class ProductsComponent implements OnInit, OnDestroy {
   });
 
   private readonly productsResource = this.medusaApi.getProducts(this.computeApiParams());
-
   protected readonly products: Signal<Product[]> = computed(
     () => this.productsResource.value()?.products || [],
   );
-
-  collections: ProductCollection[] = [];
-  productTypes: ProductType[] = [];
-  tags: ProductTag[] = [];
-
   protected readonly totalProducts = computed(() => this.productsResource.value()?.count || 0);
   protected readonly totalPages = computed(() => Math.ceil(this.totalProducts() / ITEMS_PER_PAGE));
-  protected readonly currentPage = signal(1);
   protected readonly isLoading = computed(() => this.productsResource.isLoading());
   protected readonly hasError = computed(() => !!this.productsResource.error());
-  isAddingToCart: { [productId: string]: boolean } = {};
-
-  // Filter states
-  protected readonly searchQuery = signal('');
-  protected readonly selectedCollections: WritableSignal<string[]> = signal([]);
-  protected readonly selectedTypes: WritableSignal<string[]> = signal([]);
-  protected readonly selectedTags: WritableSignal<string[]> = signal([]);
-  priceRange = { min: null as number | null, max: null as number | null };
-  sortBy = '';
-
-  private readonly subscriptions = new Subscription();
 
   ngOnInit(): void {
     // Load filter options
