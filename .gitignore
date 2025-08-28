@@ -62,3 +62,6 @@ blob-report/
 
 #backend
 /backend/.env.development
+
+#environment.json
+/storefront/public/assets/config/environment.json
