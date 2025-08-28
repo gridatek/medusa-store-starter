@@ -76,6 +76,10 @@ jobs:
 
           echo "Running database migrations..."
           npx medusa db:migrate
+        env:
+          DATABASE_URL: postgres://postgres:postgres@localhost:5432/medusa-store
+          REDIS_URL: redis://localhost:6379
+          NODE_ENV: development
 
       - name: Seed database
         run: |
