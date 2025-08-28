@@ -130,27 +130,13 @@ jobs:
         run: |
           echo "Generating publishable API key via Admin API..."
 
-          # Debug: Check what's running
-          echo "Current processes:"
-          ps aux | grep medusa || echo "No medusa processes found"
-
-          echo "Testing basic connectivity:"
-          curl -s http://localhost:9000/health || echo "Health check failed"
-
-          # Test admin endpoint
-          echo "Testing admin endpoint:"
-          curl -s -w "Status: %{http_code}\n" http://localhost:9000/admin || echo "Admin endpoint failed"
-
-          # First, authenticate with admin API
-          echo "Authenticating admin user..."
-          echo "Using email: admin@github-ci.com"
-          echo "Using password: ci-test-password-${{ github.run_id }}"
-
+          # Try the correct admin auth endpoint
+          echo "Testing admin authentication..."
           AUTH_RESPONSE=$(curl -s -w "\nHTTP_CODE:%{http_code}" -X POST http://localhost:9000/admin/auth \
             -H "Content-Type: application/json" \
             -d '{"email": "admin@github-ci.com", "password": "ci-test-password-${{ github.run_id }}"}')
 
-          echo "Auth response: $AUTH_RESPONSE"
+          echo "Full auth response: $AUTH_RESPONSE"
 
       - name: Generate Publishable API Key via Admin API
         working-directory: ./backend
