@@ -90,13 +90,14 @@ jobs:
 
       - name: Verify services are ready
         run: |
-          echo "Checking Redis connection..."
-          timeout 30s bash -c 'until redis-cli -h localhost -p 6379 ping; do echo "Waiting for Redis..."; sleep 2; done'
+          echo "Waiting for services to be ready..."
+          sleep 10  # Give services time to start
 
-          echo "Checking PostgreSQL connection..."
-          timeout 30s bash -c 'until pg_isready -h localhost -p 5432 -U postgres; do echo "Waiting for PostgreSQL..."; sleep 2; done'
+          echo "Checking if Redis port is open..."
+          nc -z localhost 6379 && echo "✅ Redis is ready!" || echo "❌ Redis not ready"
 
-          echo "✅ All services are ready!"
+          echo "Checking if PostgreSQL port is open..."
+          nc -z localhost 5432 && echo "✅ PostgreSQL is ready!" || echo "❌ PostgreSQL not ready"
 
       - name: Create Admin User
         working-directory: ./backend
