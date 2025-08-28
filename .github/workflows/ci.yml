@@ -50,24 +50,19 @@ jobs:
           echo "Testing Redis connection..."
           docker compose exec -T redis redis-cli ping
 
-      - name: Install dependencies
-        run: npm ci
-
       - name: Setup Backend Environment
         run: |
           cd backend
-            cat > .env << EOF
+          cat > .env << EOF
           DATABASE_URL=postgres://postgres:postgres@localhost:5432/medusa-store
           REDIS_URL=redis://localhost:6379
-          JWT_SECRET=test-secret
-          COOKIE_SECRET=test-cookie-secret
+          JWT_SECRET=test-secret-${{ github.run_id }}
+          COOKIE_SECRET=test-cookie-secret-${{ github.run_id }}
           NODE_ENV=development
           PORT=9000
           EOF
 
-          echo "✅ Backend .env configuration:"
-          echo "DATABASE_URL=postgres://postgres:postgres@localhost:5432/medusa-store"
-          echo "REDIS_URL=redis://localhost:6379"
+          echo "✅ Backend .env configuration created"
 
       - name: Build and migrate backend
         run: |
@@ -88,17 +83,6 @@ jobs:
           npm run seed || echo "No seed script found, skipping..."
         continue-on-error: true
 
-      - name: Verify services are ready
-        run: |
-          echo "Waiting for services to be ready..."
-          sleep 10  # Give services time to start
-
-          echo "Checking if Redis port is open..."
-          nc -z localhost 6379 && echo "✅ Redis is ready!" || echo "❌ Redis not ready"
-
-          echo "Checking if PostgreSQL port is open..."
-          nc -z localhost 5432 && echo "✅ PostgreSQL is ready!" || echo "❌ PostgreSQL not ready"
-
       - name: Create Admin User
         working-directory: ./backend
         run: |
@@ -117,8 +101,19 @@ jobs:
       - name: Wait for backend to be ready
         run: |
           echo "Waiting for Medusa backend..."
-          timeout 60s bash -c 'until curl -f http://localhost:9000/health; do sleep 2; done'
-          echo "Backend is ready!"
+          timeout 120s bash -c 'until curl -f http://localhost:9000/health; do 
+            echo "Backend not ready yet, waiting..."
+            sleep 3
+          done'
+          echo "✅ Backend health check passed"
+
+          # Additional wait for admin routes to be ready
+          echo "Testing admin auth endpoint availability..."
+          timeout 60s bash -c 'until curl -f -s -o /dev/null http://localhost:9000/admin/auth; do 
+            echo "Admin routes not ready yet, waiting..."
+            sleep 2
+          done'
+          echo "✅ Admin routes are ready"
 
       - name: Generate Publishable API Key via Admin API
         working-directory: ./backend
@@ -126,32 +121,55 @@ jobs:
           echo "Generating publishable API key via Admin API..."
 
           # First, authenticate with admin API
-          AUTH_RESPONSE=$(curl -s -X POST http://localhost:9000/admin/auth \
+          echo "Authenticating admin user..."
+          AUTH_RESPONSE=$(curl -s -w "\nHTTP_CODE:%{http_code}" -X POST http://localhost:9000/admin/auth \
             -H "Content-Type: application/json" \
             -d '{"email": "admin@github-ci.com", "password": "ci-test-password-${{ github.run_id }}"}')
 
-          # Extract access token
-          ACCESS_TOKEN=$(echo $AUTH_RESPONSE | grep -o '"access_token":"[^"]*' | grep -o '[^"]*
+          echo "Auth response: $AUTH_RESPONSE"
 
-          if [ -z "$ACCESS_TOKEN" ]; then
-            echo "Failed to authenticate admin user"
+          # Check if authentication was successful
+          HTTP_CODE=$(echo "$AUTH_RESPONSE" | grep -o "HTTP_CODE:[0-9]*" | cut -d: -f2)
+          if [ "$HTTP_CODE" != "200" ]; then
+            echo "Authentication failed with HTTP code: $HTTP_CODE"
+            echo "Full response: $AUTH_RESPONSE"
             exit 1
           fi
 
-          echo "Admin authenticated successfully"
+          # Extract access token
+          ACCESS_TOKEN=$(echo "$AUTH_RESPONSE" | grep -o '"access_token":"[^"]*"' | cut -d'"' -f4)
+
+          if [ -z "$ACCESS_TOKEN" ]; then
+            echo "Failed to extract access token from response"
+            echo "Full response: $AUTH_RESPONSE"
+            exit 1
+          fi
+
+          echo "Admin authenticated successfully, token length: ${#ACCESS_TOKEN}"
 
           # Create publishable API key
-          KEY_RESPONSE=$(curl -s -X POST http://localhost:9000/admin/publishable-api-keys \
+          echo "Creating publishable API key..."
+          KEY_RESPONSE=$(curl -s -w "\nHTTP_CODE:%{http_code}" -X POST http://localhost:9000/admin/publishable-api-keys \
             -H "Content-Type: application/json" \
             -H "Authorization: Bearer $ACCESS_TOKEN" \
             -d '{"title": "CI Test Key"}')
 
+          echo "Key creation response: $KEY_RESPONSE"
+
+          # Check if key creation was successful
+          HTTP_CODE=$(echo "$KEY_RESPONSE" | grep -o "HTTP_CODE:[0-9]*" | cut -d: -f2)
+          if [ "$HTTP_CODE" != "200" ] && [ "$HTTP_CODE" != "201" ]; then
+            echo "Key creation failed with HTTP code: $HTTP_CODE"
+            echo "Full response: $KEY_RESPONSE"
+            exit 1
+          fi
+
           # Extract the publishable key
-          PUBLISHABLE_KEY=$(echo $KEY_RESPONSE | grep -o '"id":"pk_[^"]*' | grep -o 'pk_[^"]*')
+          PUBLISHABLE_KEY=$(echo "$KEY_RESPONSE" | grep -o '"id":"pk_[^"]*"' | cut -d'"' -f4)
 
           if [ -z "$PUBLISHABLE_KEY" ]; then
-            echo "Failed to create publishable API key"
-            echo "Response: $KEY_RESPONSE"
+            echo "Failed to extract publishable API key from response"
+            echo "Full response: $KEY_RESPONSE"
             exit 1
           fi
 
@@ -191,8 +209,11 @@ jobs:
       - name: Wait for storefront to be ready
         run: |
           echo "Waiting for Angular storefront..."
-          timeout 60s bash -c 'until curl -f http://localhost:4200; do sleep 2; done'
-          echo "Storefront is ready!"
+          timeout 120s bash -c 'until curl -f http://localhost:4200; do 
+            echo "Storefront not ready yet, waiting..."
+            sleep 3
+          done'
+          echo "✅ Storefront is ready!"
 
       - name: Install Playwright browsers
         run: |
