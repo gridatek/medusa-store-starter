@@ -1,15 +1,16 @@
 import {
   ChangeDetectionStrategy,
   Component,
-  OnInit,
+  Signal,
   ViewEncapsulation,
+  computed,
   inject,
 } from '@angular/core';
 
 import { RouterModule } from '@angular/router';
-import { MedusaApiService } from '../services/medusa-api.service';
-import { CartService } from '../services/cart.service';
 import { Product, formatPrice, getProductPrice } from '../../../../shared/src/types';
+import { CartService } from '../services/cart.service';
+import { MedusaApiService } from '../services/medusa-api.service';
 
 @Component({
   selector: 'app-home',
@@ -47,14 +48,14 @@ import { Product, formatPrice, getProductPrice } from '../../../../shared/src/ty
           </div>
 
           <!-- Loading State -->
-          @if (isLoading) {
+          @if (isLoading()) {
             <div class="flex justify-center items-center py-12">
               <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
             </div>
           }
 
           <!-- Error State -->
-          @if (hasError && !isLoading) {
+          @if (hasError() && !isLoading()) {
             <div data-testid="error-message" class="text-center py-12">
               <div class="text-red-500 mb-4">
                 <svg
@@ -82,12 +83,12 @@ import { Product, formatPrice, getProductPrice } from '../../../../shared/src/ty
           }
 
           <!-- Products Grid -->
-          @if (!isLoading && !hasError) {
+          @if (!isLoading() && !hasError()) {
             <div
               data-testid="product-grid"
               class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
             >
-              @for (product of featuredProducts; track trackByProductId($index, product)) {
+              @for (product of featuredProducts(); track trackByProductId($index, product)) {
                 <div
                   data-testid="product-card"
                   class="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow cursor-pointer group"
@@ -153,7 +154,7 @@ import { Product, formatPrice, getProductPrice } from '../../../../shared/src/ty
           }
 
           <!-- View All Products Button -->
-          @if (!isLoading && featuredProducts.length > 0) {
+          @if (!isLoading() && featuredProducts().length > 0) {
             <div class="text-center mt-12">
               <a
                 routerLink="/products"
@@ -270,41 +271,47 @@ import { Product, formatPrice, getProductPrice } from '../../../../shared/src/ty
   encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class HomeComponent implements OnInit {
+export class HomeComponent {
   private readonly medusaApi = inject(MedusaApiService);
   private readonly cartService = inject(CartService);
 
-  featuredProducts: Product[] = [];
-  isLoading = true;
-  hasError = false;
+  private readonly productsResource = this.medusaApi.getProducts({ limit: 8 });
+
+  protected readonly featuredProducts: Signal<Product[]> = computed(
+    () => this.productsResource.value()?.products || [],
+  );
+
+  protected readonly isLoading = computed(() => this.productsResource.isLoading());
+  protected readonly hasError = computed(() => !!this.productsResource.error());
+
   isAddingToCart: { [productId: string]: boolean } = {};
 
-  ngOnInit(): void {
-    this.loadProducts();
+  protected loadProducts() {
+    console.log('Loading products again...');
   }
 
-  async loadProducts(): Promise<void> {
-    this.isLoading = true;
-    this.hasError = false;
+  // async loadProducts(): Promise<void> {
+  //   this.isLoading = true;
+  //   this.hasError = false;
 
-    try {
-      this.medusaApi.getProducts({ limit: 8 }).subscribe({
-        next: (products) => {
-          this.featuredProducts = products;
-          this.isLoading = false;
-        },
-        error: (error) => {
-          console.error('Error loading products:', error);
-          this.hasError = true;
-          this.isLoading = false;
-        },
-      });
-    } catch (error) {
-      console.error('Error loading products:', error);
-      this.hasError = true;
-      this.isLoading = false;
-    }
-  }
+  //   try {
+  //     this.medusaApi.getProducts({ limit: 8 }).subscribe({
+  //       next: (products) => {
+  //         this.featuredProducts = products;
+  //         this.isLoading = false;
+  //       },
+  //       error: (error) => {
+  //         console.error('Error loading products:', error);
+  //         this.hasError = true;
+  //         this.isLoading = false;
+  //       },
+  //     });
+  //   } catch (error) {
+  //     console.error('Error loading products:', error);
+  //     this.hasError = true;
+  //     this.isLoading = false;
+  //   }
+  // }
 
   navigateToProduct(product: Product): void {
     window.location.href = `/products/${product.handle || product.id}`;
