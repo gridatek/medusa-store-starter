@@ -10,7 +10,7 @@ import {
 import { RouterModule } from '@angular/router';
 import { Product, formatPrice, getProductPrice } from '../../../../shared/src/types';
 import { CartService } from '../services/cart.service';
-import { MedusaApiService } from '../services/medusa-api.service';
+import { ProductsApiService } from '../services/products-api.service';
 
 @Component({
   selector: 'app-home',
@@ -271,10 +271,10 @@ import { MedusaApiService } from '../services/medusa-api.service';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class HomeComponent {
-  private readonly medusaApi = inject(MedusaApiService);
+  private readonly productsApiService = inject(ProductsApiService);
   private readonly cartService = inject(CartService);
 
-  private readonly productsResource = this.medusaApi.getProducts({ limit: 8 });
+  private readonly productsResource = this.productsApiService.createProductsResource({ limit: 8 });
 
   protected readonly featuredProducts: Signal<Product[]> = computed(
     () => this.productsResource.value()?.products || [],

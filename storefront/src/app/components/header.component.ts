@@ -14,7 +14,7 @@ import {
 } from '../../../../shared/src/types';
 import { AuthService } from '../services/auth.service';
 import { CartService } from '../services/cart.service';
-import { MedusaApiService } from '../services/medusa-api.service';
+import { ProductsApiService } from '../services/products-api.service';
 import { AuthModalComponent } from './auth-modal.component';
 
 @Component({
@@ -340,7 +340,7 @@ import { AuthModalComponent } from './auth-modal.component';
 })
 export class HeaderComponent implements OnInit, OnDestroy {
   private readonly cartService = inject(CartService);
-  private readonly medusaApi = inject(MedusaApiService);
+  private readonly productsApiService = inject(ProductsApiService);
   private readonly authService = inject(AuthService);
 
   private readonly searchSubject = new Subject<string>();
@@ -355,7 +355,9 @@ export class HeaderComponent implements OnInit, OnDestroy {
     { initialValue: '' },
   );
 
-  private readonly productsResource = this.medusaApi.searchProducts(this.debouncedSearchQuery());
+  private readonly productsResource = this.productsApiService.createSearchProductsResource(
+    this.debouncedSearchQuery(),
+  );
 
   searchQuery = '';
 
