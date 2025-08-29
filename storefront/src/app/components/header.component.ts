@@ -19,7 +19,6 @@ import { AuthModalComponent } from './auth-modal.component';
 
 @Component({
   selector: 'app-header',
-  standalone: true,
   imports: [RouterModule, AuthModalComponent],
   template: `
     <header

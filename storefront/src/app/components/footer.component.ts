@@ -3,7 +3,6 @@ import { RouterModule } from '@angular/router';
 
 @Component({
   selector: 'app-footer',
-  standalone: true,
   imports: [RouterModule],
   template: `
     <footer data-testid="footer" class="bg-gray-900 text-white">

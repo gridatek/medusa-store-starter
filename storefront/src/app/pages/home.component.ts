@@ -14,7 +14,6 @@ import { MedusaApiService } from '../services/medusa-api.service';
 
 @Component({
   selector: 'app-home',
-  standalone: true,
   imports: [RouterModule],
   template: `
     <div class="min-h-screen">

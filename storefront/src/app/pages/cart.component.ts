@@ -7,7 +7,6 @@ import { Cart, CartSummary, LineItem, formatPrice } from '../../../../shared/src
 
 @Component({
   selector: 'app-cart',
-  standalone: true,
   imports: [RouterModule],
   template: `
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">

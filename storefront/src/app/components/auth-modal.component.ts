@@ -6,7 +6,6 @@ import { LoginCredentials, RegisterData } from '../../../../shared/src/types';
 
 @Component({
   selector: 'app-auth-modal',
-  standalone: true,
   imports: [FormsModule],
   template: `
     @if (isOpen()) {

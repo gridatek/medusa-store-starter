@@ -1,7 +1,6 @@
 import {
   ChangeDetectionStrategy,
   Component,
-  OnDestroy,
   OnInit,
   Signal,
   ViewEncapsulation,
@@ -12,8 +11,7 @@ import {
 } from '@angular/core';
 
 import { FormsModule } from '@angular/forms';
-import { ActivatedRoute, Router, RouterModule } from '@angular/router';
-import { Subscription } from 'rxjs';
+import { Router, RouterModule } from '@angular/router';
 import {
   ITEMS_PER_PAGE,
   Product,
@@ -25,7 +23,7 @@ import {
   isProductInStock,
 } from '../../../../shared/src/types';
 import { CartService } from '../services/cart.service';
-import { MedusaApiService } from '../services/medusa-api.service';
+import { ProductsApiService } from '../services/products-api.service';
 
 interface FilterState {
   search?: string;
@@ -40,7 +38,6 @@ interface FilterState {
 
 @Component({
   selector: 'app-products',
-  standalone: true,
   imports: [RouterModule, FormsModule],
   template: `
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -246,7 +243,7 @@ interface FilterState {
           }
 
           <!-- Empty State -->
-          @if (!isLoading() && !hasError() && products().length === 0) {
+          @if (!isLoading() && !hasError() && products.length === 0) {
             <div class="text-center py-16">
               <div class="text-gray-400 mb-4">
                 <svg
@@ -269,12 +266,12 @@ interface FilterState {
           }
 
           <!-- Products Grid -->
-          @if (!isLoading() && !hasError() && products().length > 0) {
+          @if (!isLoading() && !hasError() && products.length > 0) {
             <div
               data-testid="product-grid"
               class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
             >
-              @for (product of products(); track trackByProductId($index, product)) {
+              @for (product of products(); track product.id) {
                 <div
                   data-testid="product-card"
                   class="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow cursor-pointer group"
@@ -405,29 +402,10 @@ interface FilterState {
   encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class ProductsComponent implements OnInit, OnDestroy {
-  private readonly medusaApi = inject(MedusaApiService);
+export class ProductsComponent implements OnInit {
+  private readonly productsApiService = inject(ProductsApiService);
   private readonly cartService = inject(CartService);
-  private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
-
-  collections: ProductCollection[] = [];
-  productTypes: ProductType[] = [];
-  tags: ProductTag[] = [];
-
-  protected readonly currentPage = signal(1);
-
-  isAddingToCart: { [productId: string]: boolean } = {};
-
-  // Filter states
-  protected readonly searchQuery = signal('');
-  protected readonly selectedCollections: WritableSignal<string[]> = signal([]);
-  protected readonly selectedTypes: WritableSignal<string[]> = signal([]);
-  protected readonly selectedTags: WritableSignal<string[]> = signal([]);
-  priceRange = { min: null as number | null, max: null as number | null };
-  sortBy = '';
-
-  private readonly subscriptions = new Subscription();
 
   private readonly computeApiParams: Signal<any> = computed(() => {
     const params: any = {
@@ -454,14 +432,32 @@ export class ProductsComponent implements OnInit, OnDestroy {
     return params;
   });
 
-  private readonly productsResource = this.medusaApi.getProducts(this.computeApiParams());
+  private readonly productsResource = this.productsApiService.createProductsResource(
+    this.computeApiParams(),
+  );
+
   protected readonly products: Signal<Product[]> = computed(
     () => this.productsResource.value()?.products || [],
   );
+
+  collections: ProductCollection[] = [];
+  productTypes: ProductType[] = [];
+  tags: ProductTag[] = [];
+
   protected readonly totalProducts = computed(() => this.productsResource.value()?.count || 0);
   protected readonly totalPages = computed(() => Math.ceil(this.totalProducts() / ITEMS_PER_PAGE));
+  protected readonly currentPage = signal(1);
   protected readonly isLoading = computed(() => this.productsResource.isLoading());
   protected readonly hasError = computed(() => !!this.productsResource.error());
+  isAddingToCart: { [productId: string]: boolean } = {};
+
+  // Filter states
+  protected readonly searchQuery = signal('');
+  protected readonly selectedCollections: WritableSignal<string[]> = signal([]);
+  protected readonly selectedTypes: WritableSignal<string[]> = signal([]);
+  protected readonly selectedTags: WritableSignal<string[]> = signal([]);
+  priceRange = { min: null as number | null, max: null as number | null };
+  sortBy = '';
 
   ngOnInit(): void {
     // Load filter options
@@ -471,10 +467,6 @@ export class ProductsComponent implements OnInit, OnDestroy {
 
     // Load initial products
     // this.loadProducts();
-  }
-
-  ngOnDestroy(): void {
-    this.subscriptions.unsubscribe();
   }
 
   protected loadProducts() {
@@ -656,9 +648,5 @@ export class ProductsComponent implements OnInit, OnDestroy {
   onImageError(event: Event): void {
     const img = event.target as HTMLImageElement;
     img.src = '/assets/placeholder-product.png';
-  }
-
-  trackByProductId(index: number, product: Product): string {
-    return product.id;
   }
 }

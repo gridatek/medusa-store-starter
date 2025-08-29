@@ -1,4 +1,4 @@
-import { HttpClient, HttpParams, httpResource, HttpResourceRef } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { BehaviorSubject, Observable, throwError } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
@@ -7,9 +7,6 @@ import {
   CartResponse,
   DEFAULT_REGION,
   ENDPOINTS,
-  Product,
-  ProductResponse,
-  ProductsResponse,
   Region,
   RegionsResponse,
 } from '../../../../shared/src/types';
@@ -41,72 +38,6 @@ export class MedusaApiService {
 
   getCurrentRegion(): Observable<Region | null> {
     return this.currentRegion$.asObservable();
-  }
-
-  // Products
-  getProducts(params?: {
-    offset?: number;
-    limit?: number;
-    q?: string;
-    collection_id?: string[];
-    type_id?: string[];
-    tags?: string[];
-    region_id?: string;
-  }) {
-    let httpParams = new HttpParams();
-
-    if (params?.offset) httpParams = httpParams.set('offset', params.offset.toString());
-    if (params?.limit) httpParams = httpParams.set('limit', params.limit.toString());
-    if (params?.q) httpParams = httpParams.set('q', params.q);
-    if (params?.collection_id) {
-      params.collection_id.forEach((id) => {
-        httpParams = httpParams.append('collection_id', id);
-      });
-    }
-    if (params?.type_id) {
-      params.type_id.forEach((id) => {
-        httpParams = httpParams.append('type_id', id);
-      });
-    }
-    if (params?.tags) {
-      params.tags.forEach((tag) => {
-        httpParams = httpParams.append('tags', tag);
-      });
-    }
-    if (params?.region_id) httpParams = httpParams.set('region_id', params.region_id);
-
-    const url = `${this.apiBaseUrl}${ENDPOINTS.PRODUCTS}`;
-
-    // return this.http.get<ProductsResponse>(url, { params: httpParams }).pipe(
-    //   map((response) => response.products),
-    //   catchError((error) => {
-    //     console.error('Error fetching products:', error);
-    //     return throwError(error);
-    //   }),
-    // );
-
-    return httpResource<ProductsResponse>(() => {
-      return {
-        url: url,
-        params: httpParams,
-      };
-    });
-  }
-
-  getProduct(id: string): Observable<Product> {
-    const url = `${this.apiBaseUrl}${ENDPOINTS.PRODUCT_BY_ID(id)}`;
-
-    return this.http.get<ProductResponse>(url).pipe(
-      map((response) => response.product),
-      catchError((error) => {
-        console.error('Error fetching product:', error);
-        return throwError(error);
-      }),
-    );
-  }
-
-  searchProducts(query: string) {
-    return this.getProducts({ q: query, limit: 10 });
   }
 
   // Regions

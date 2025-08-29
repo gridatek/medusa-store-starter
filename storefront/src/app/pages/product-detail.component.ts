@@ -1,32 +1,41 @@
-import { Component, OnInit, OnDestroy, inject } from '@angular/core';
+import {
+  Component,
+  OnDestroy,
+  OnInit,
+  Signal,
+  WritableSignal,
+  computed,
+  inject,
+  linkedSignal,
+} from '@angular/core';
 
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Params } from '@angular/router';
 import { Subscription } from 'rxjs';
-import { MedusaApiService } from '../services/medusa-api.service';
-import { CartService } from '../services/cart.service';
 import {
   Product,
   ProductVariant,
   formatPrice,
   getProductImages,
-  isProductInStock,
 } from '../../../../shared/src/types';
+import { CartService } from '../services/cart.service';
+import { MedusaApiService } from '../services/medusa-api.service';
+import { ProductsApiService } from '../services/products-api.service';
+import { toSignal } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'app-product-detail',
-  standalone: true,
   imports: [],
   template: `
     <div data-testid="product-detail" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <!-- Loading State -->
-      @if (isLoading) {
+      @if (isLoading()) {
         <div class="flex justify-center items-center py-24">
           <div class="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-600"></div>
         </div>
       }
 
       <!-- Error State -->
-      @if (hasError && !isLoading) {
+      @if (hasError() && !isLoading()) {
         <div class="text-center py-24">
           <div class="text-red-500 mb-4">
             <svg class="w-16 h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -49,7 +58,7 @@ import {
       }
 
       <!-- Product Content -->
-      @if (product && !isLoading) {
+      @if (product() && !isLoading()) {
         <div class="lg:grid lg:grid-cols-2 lg:gap-x-8 lg:items-start">
           <!-- Image Gallery -->
           <div data-testid="product-images" class="flex flex-col-reverse">
@@ -65,11 +74,11 @@ import {
                       [class.ring-blue-500]="selectedImageIndex === i"
                       (click)="selectImage(i)"
                     >
-                      <span class="sr-only">{{ product.title }} image {{ i + 1 }}</span>
+                      <span class="sr-only">{{ product()?.title }} image {{ i + 1 }}</span>
                       <span class="absolute inset-0 rounded-md overflow-hidden">
                         <img
                           [src]="image"
-                          [alt]="product.title"
+                          [alt]="product()?.title"
                           class="w-full h-full object-center object-cover"
                         />
                       </span>
@@ -83,7 +92,7 @@ import {
               <img
                 data-testid="main-product-image"
                 [src]="getCurrentImage()"
-                [alt]="product.title"
+                [alt]="product()?.title"
                 class="w-full h-full object-center object-cover sm:rounded-lg"
                 (error)="onImageError($event)"
               />
@@ -92,7 +101,7 @@ import {
           <!-- Product Info -->
           <div class="mt-10 px-4 sm:px-0 sm:mt-16 lg:mt-0">
             <h1 data-testid="product-title" class="text-3xl font-bold tracking-tight text-gray-900">
-              {{ product.title }}
+              {{ product()?.title }}
             </h1>
             <div class="mt-3">
               <h2 class="sr-only">Product information</h2>
@@ -116,17 +125,17 @@ import {
             <div class="mt-6">
               <h3 class="sr-only">Description</h3>
               <div data-testid="product-description" class="text-base text-gray-700 space-y-6">
-                <p>{{ product.description }}</p>
+                <p>{{ product()?.description }}</p>
               </div>
             </div>
             <!-- Variant Selection -->
-            @if (product.variants.length > 1) {
+            @if ((product()?.variants?.length ?? 0) > 1) {
               <div class="mt-8">
                 <div class="flex items-center justify-between">
                   <h3 class="text-lg font-medium text-gray-900">Options</h3>
                 </div>
                 <div class="mt-4 space-y-4">
-                  @for (option of product.options; track option) {
+                  @for (option of product()?.options; track option) {
                     <div class="space-y-2">
                       <h4 class="text-sm font-medium text-gray-700">{{ option.title }}</h4>
                       <div class="flex flex-wrap gap-2">
@@ -185,7 +194,7 @@ import {
             </div>
             <!-- Stock Status -->
             <div class="mt-4">
-              @if (selectedVariant && selectedVariant.inventory_quantity > 0) {
+              @if (selectedVariant() && selectedVariant()?.inventory_quantity > 0) {
                 <div class="flex items-center text-green-600">
                   <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
                     <path
@@ -195,14 +204,14 @@ import {
                     ></path>
                   </svg>
                   <span class="text-sm font-medium"
-                    >In Stock ({{ selectedVariant.inventory_quantity }} available)</span
+                    >In Stock ({{ selectedVariant()?.inventory_quantity }} available)</span
                   >
                 </div>
               }
               @if (
-                selectedVariant &&
-                selectedVariant.inventory_quantity === 0 &&
-                selectedVariant.allow_backorder
+                selectedVariant() &&
+                selectedVariant()?.inventory_quantity === 0 &&
+                selectedVariant()?.allow_backorder
               ) {
                 <div class="flex items-center text-yellow-600">
                   <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
@@ -216,9 +225,9 @@ import {
                 </div>
               }
               @if (
-                selectedVariant &&
-                selectedVariant.inventory_quantity === 0 &&
-                !selectedVariant.allow_backorder
+                selectedVariant() &&
+                selectedVariant()?.inventory_quantity === 0 &&
+                !selectedVariant()?.allow_backorder
               ) {
                 <div class="flex items-center text-red-600">
                   <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
@@ -258,38 +267,38 @@ import {
             <div class="mt-10 border-t border-gray-200 pt-8">
               <h3 class="text-lg font-medium text-gray-900 mb-4">Product Details</h3>
               <div class="space-y-4">
-                @if (selectedVariant?.sku) {
+                @if (selectedVariant()?.sku) {
                   <div class="flex justify-between">
                     <span class="text-sm text-gray-500">SKU:</span>
-                    <span class="text-sm text-gray-900">{{ selectedVariant?.sku }}</span>
+                    <span class="text-sm text-gray-900">{{ selectedVariant()?.sku }}</span>
                   </div>
                 }
-                @if (product.weight) {
+                @if (product()?.weight) {
                   <div class="flex justify-between">
                     <span class="text-sm text-gray-500">Weight:</span>
-                    <span class="text-sm text-gray-900">{{ product.weight }}g</span>
+                    <span class="text-sm text-gray-900">{{ product()?.weight }}g</span>
                   </div>
                 }
-                @if (product.material) {
+                @if (product()?.material) {
                   <div class="flex justify-between">
                     <span class="text-sm text-gray-500">Material:</span>
-                    <span class="text-sm text-gray-900">{{ product.material }}</span>
+                    <span class="text-sm text-gray-900">{{ product()?.material }}</span>
                   </div>
                 }
-                @if (product.origin_country) {
+                @if (product()?.origin_country) {
                   <div class="flex justify-between">
                     <span class="text-sm text-gray-500">Origin:</span>
-                    <span class="text-sm text-gray-900">{{ product.origin_country }}</span>
+                    <span class="text-sm text-gray-900">{{ product()?.origin_country }}</span>
                   </div>
                 }
               </div>
             </div>
             <!-- Tags -->
-            @if (product.tags && product.tags.length > 0) {
+            @if (product()?.tags && product()?.tags?.length > 0) {
               <div class="mt-8">
                 <h3 class="text-sm font-medium text-gray-900 mb-3">Tags</h3>
                 <div class="flex flex-wrap gap-2">
-                  @for (tag of product.tags; track tag) {
+                  @for (tag of product()?.tags; track tag) {
                     <span
                       class="inline-block bg-gray-100 text-gray-800 text-xs px-2 py-1 rounded-full"
                     >
@@ -306,60 +315,68 @@ import {
   `,
   styles: [],
 })
-export class ProductDetailComponent implements OnInit, OnDestroy {
-  private route = inject(ActivatedRoute);
-  private medusaApi = inject(MedusaApiService);
-  private cartService = inject(CartService);
+export class ProductDetailComponent {
+  private readonly route = inject(ActivatedRoute);
+  private readonly medusaApi = inject(MedusaApiService);
+  private readonly cartService = inject(CartService);
 
-  product: Product | null = null;
-  selectedVariant: ProductVariant | null = null;
+  private readonly productsApiService = inject(ProductsApiService);
+
+  // Convert route params to signal with proper typing
+  private readonly routeParams = toSignal(this.route.params, {
+    initialValue: {} as Params,
+  });
+
+  // Extract productId as a computed signal with proper type assertion
+  private readonly productId = computed(() => {
+    const params = this.routeParams();
+    return params?.['id'] as string | undefined;
+  });
+
+  private readonly productsResource = this.productsApiService.createProductResource(
+    this.productId(),
+  );
+
+  protected readonly product: Signal<Product | null> = computed(
+    () => this.productsResource?.value()?.product ?? null,
+  );
+
+  protected readonly selectedVariant: WritableSignal<ProductVariant | null> = linkedSignal(
+    () => this.productsResource?.value()?.product?.variants[0] ?? null,
+  );
+
   selectedOptions: { [optionId: string]: string } = {};
   quantity = 1;
   selectedImageIndex = 0;
   productImages: string[] = [];
-  isLoading = true;
-  hasError = false;
+  protected readonly isLoading = computed(() => this.productsResource?.isLoading() ?? false);
+  protected readonly hasError = computed(() => !!this.productsResource?.error());
   isAddingToCart = false;
 
-  private subscriptions = new Subscription();
+  // private loadProduct(productId: string): void {
+  //   this.isLoading = true;
+  //   this.hasError = false;
 
-  ngOnInit(): void {
-    this.subscriptions.add(
-      this.route.params.subscribe((params) => {
-        const productId = params['id'];
-        this.loadProduct(productId);
-      }),
-    );
-  }
-
-  ngOnDestroy(): void {
-    this.subscriptions.unsubscribe();
-  }
-
-  private loadProduct(productId: string): void {
-    this.isLoading = true;
-    this.hasError = false;
-
-    this.medusaApi.getProduct(productId).subscribe({
-      next: (product) => {
-        this.product = product;
-        this.productImages = getProductImages(product);
-        this.selectedVariant = product.variants[0] || null;
-        this.initializeOptions();
-        this.isLoading = false;
-      },
-      error: (error) => {
-        console.error('Error loading product:', error);
-        this.hasError = true;
-        this.isLoading = false;
-      },
-    });
-  }
+  //   this.medusaApi.getProduct(productId).subscribe({
+  //     next: (product) => {
+  //       this.product = product;
+  //       this.productImages = getProductImages(product);
+  //       this.selectedVariant = product.variants[0] || null;
+  //       this.initializeOptions();
+  //       this.isLoading = false;
+  //     },
+  //     error: (error) => {
+  //       console.error('Error loading product:', error);
+  //       this.hasError = true;
+  //       this.isLoading = false;
+  //     },
+  //   });
+  // }
 
   private initializeOptions(): void {
     if (!this.product || !this.selectedVariant) return;
 
-    this.selectedVariant.options.forEach((option) => {
+    this.selectedVariant()?.options.forEach((option) => {
       this.selectedOptions[option.option_id] = option.id;
     });
   }
@@ -378,14 +395,14 @@ export class ProductDetailComponent implements OnInit, OnDestroy {
   getCurrentPrice(): string {
     if (!this.selectedVariant) return 'Price not available';
 
-    const price = this.selectedVariant.prices[0];
+    const price = this.selectedVariant()?.prices[0];
     return price ? formatPrice(price.amount, price.currency_code) : 'Price not available';
   }
 
   getOptionValues(optionId: string) {
     if (!this.product) return [];
 
-    const option = this.product.options.find((opt) => opt.id === optionId);
+    const option = this.product()?.options.find((opt) => opt.id === optionId);
     return option ? option.values : [];
   }
 
@@ -401,12 +418,12 @@ export class ProductDetailComponent implements OnInit, OnDestroy {
   private updateSelectedVariant(): void {
     if (!this.product) return;
 
-    const variant = this.product.variants.find((variant) =>
+    const variant = this.product()?.variants.find((variant) =>
       variant.options.every((option) => this.selectedOptions[option.option_id] === option.id),
     );
 
     if (variant) {
-      this.selectedVariant = variant;
+      this.selectedVariant.set(variant);
     }
   }
 
@@ -434,7 +451,7 @@ export class ProductDetailComponent implements OnInit, OnDestroy {
   canAddToCart(): boolean {
     return !!(
       this.selectedVariant &&
-      (this.selectedVariant.inventory_quantity > 0 || this.selectedVariant.allow_backorder)
+      (this.selectedVariant()?.inventory_quantity > 0 || this.selectedVariant()?.allow_backorder)
     );
   }
 
@@ -444,7 +461,7 @@ export class ProductDetailComponent implements OnInit, OnDestroy {
     this.isAddingToCart = true;
 
     try {
-      await this.cartService.addToCart(this.selectedVariant.id, this.quantity).toPromise();
+      await this.cartService.addToCart(this.selectedVariant()?.id, this.quantity).toPromise();
       // Show success message (you could add a toast notification here)
       console.log('Product added to cart successfully');
     } catch (error) {
