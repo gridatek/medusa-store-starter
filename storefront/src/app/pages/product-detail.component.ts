@@ -1,26 +1,10 @@
-import {
-  Component,
-  OnDestroy,
-  OnInit,
-  Signal,
-  WritableSignal,
-  computed,
-  inject,
-  linkedSignal,
-} from '@angular/core';
+import { Component, Signal, WritableSignal, computed, inject, linkedSignal } from '@angular/core';
 
-import { ActivatedRoute, Params } from '@angular/router';
-import { Subscription } from 'rxjs';
-import {
-  Product,
-  ProductVariant,
-  formatPrice,
-  getProductImages,
-} from '../../../../shared/src/types';
-import { CartService } from '../services/cart.service';
-import { MedusaApiService } from '../services/medusa-api.service';
-import { ProductsApiService } from '../services/products-api.service';
 import { toSignal } from '@angular/core/rxjs-interop';
+import { ActivatedRoute, Params } from '@angular/router';
+import { Product, ProductVariant, formatPrice } from '../../../../shared/src/types';
+import { CartService } from '../services/cart.service';
+import { ProductsApiService } from '../services/products-api.service';
 
 @Component({
   selector: 'app-product-detail',
@@ -194,7 +178,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
             </div>
             <!-- Stock Status -->
             <div class="mt-4">
-              @if (selectedVariant() && selectedVariant()?.inventory_quantity > 0) {
+              @if (selectedVariant() && selectedVariant()!.inventory_quantity > 0) {
                 <div class="flex items-center text-green-600">
                   <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
                     <path
@@ -294,7 +278,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
               </div>
             </div>
             <!-- Tags -->
-            @if (product()?.tags && product()?.tags?.length > 0) {
+            @if ((product()?.tags ?? []).length > 0) {
               <div class="mt-8">
                 <h3 class="text-sm font-medium text-gray-900 mb-3">Tags</h3>
                 <div class="flex flex-wrap gap-2">
@@ -317,7 +301,6 @@ import { toSignal } from '@angular/core/rxjs-interop';
 })
 export class ProductDetailComponent {
   private readonly route = inject(ActivatedRoute);
-  private readonly medusaApi = inject(MedusaApiService);
   private readonly cartService = inject(CartService);
 
   private readonly productsApiService = inject(ProductsApiService);
@@ -374,7 +357,7 @@ export class ProductDetailComponent {
   // }
 
   private initializeOptions(): void {
-    if (!this.product || !this.selectedVariant) return;
+    if (!this.product() || !this.selectedVariant()) return;
 
     this.selectedVariant()?.options.forEach((option) => {
       this.selectedOptions[option.option_id] = option.id;
@@ -449,19 +432,20 @@ export class ProductDetailComponent {
   }
 
   canAddToCart(): boolean {
-    return !!(
-      this.selectedVariant &&
-      (this.selectedVariant()?.inventory_quantity > 0 || this.selectedVariant()?.allow_backorder)
-    );
+    const variant = this.selectedVariant?.();
+    return !!(variant && (variant.inventory_quantity > 0 || variant.allow_backorder));
   }
 
   async addToCart(): Promise<void> {
     if (!this.selectedVariant || this.isAddingToCart) return;
 
+    const variantId = this.selectedVariant()?.id;
+    if (!variantId) return;
+
     this.isAddingToCart = true;
 
     try {
-      await this.cartService.addToCart(this.selectedVariant()?.id, this.quantity).toPromise();
+      await this.cartService.addToCart(variantId, this.quantity).toPromise();
       // Show success message (you could add a toast notification here)
       console.log('Product added to cart successfully');
     } catch (error) {
