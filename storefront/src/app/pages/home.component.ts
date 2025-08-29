@@ -20,7 +20,7 @@ import { ProductsApiService } from '../services/products-api.service';
       <!-- Hero Section -->
       <section
         data-testid="hero-section"
-        class="bg-gradient-to-r from-blue-600 to-purple-700 text-white"
+        class="bg-linear-to-r from-blue-600 to-purple-700 text-white"
       >
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
           <div class="text-center">
@@ -254,7 +254,7 @@ import { ProductsApiService } from '../services/products-api.service';
             <input
               type="email"
               placeholder="Enter your email"
-              class="flex-1 px-4 py-3 rounded-l-lg focus:outline-none focus:ring-2 focus:ring-blue-300"
+              class="flex-1 px-4 py-3 rounded-l-lg focus:outline-hidden focus:ring-2 focus:ring-blue-300"
             />
             <button
               class="bg-white text-blue-600 px-6 py-3 rounded-r-lg font-semibold hover:bg-gray-100 transition-colors"

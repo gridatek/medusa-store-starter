@@ -50,7 +50,7 @@ import { Cart, CartSummary, LineItem, formatPrice } from '../../../../shared/src
                   class="flex items-center space-x-4 border-b border-gray-200 pb-6"
                 >
                   <!-- Product Image -->
-                  <div class="flex-shrink-0">
+                  <div class="shrink-0">
                     <img
                       data-testid="item-image"
                       [src]="item.thumbnail || '/assets/placeholder-product.png'"
@@ -87,7 +87,7 @@ import { Cart, CartSummary, LineItem, formatPrice } from '../../../../shared/src
                     </button>
                     <span
                       data-testid="item-quantity"
-                      class="px-3 py-1 border border-gray-300 rounded-md min-w-[3rem] text-center"
+                      class="px-3 py-1 border border-gray-300 rounded-md min-w-12 text-center"
                     >
                       {{ item.quantity }}
                     </span>

@@ -23,7 +23,7 @@ import { AuthModalComponent } from './auth-modal.component';
   template: `
     <header
       data-testid="header"
-      class="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-40"
+      class="bg-white shadow-xs border-b border-gray-200 sticky top-0 z-40"
     >
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex items-center justify-between h-16">
@@ -130,7 +130,7 @@ import { AuthModalComponent } from './auth-modal.component';
                           <img
                             [src]="product.thumbnail || '/assets/placeholder-product.png'"
                             [alt]="product.title"
-                            class="w-12 h-12 object-cover rounded-md flex-shrink-0"
+                            class="w-12 h-12 object-cover rounded-md shrink-0"
                           />
                           <div class="flex-1 min-w-0">
                             <h3

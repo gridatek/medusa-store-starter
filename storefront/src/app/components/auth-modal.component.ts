@@ -87,7 +87,7 @@ import { LoginCredentials, RegisterData } from '../../../../shared/src/types';
                     name="email"
                     [(ngModel)]="loginData.email"
                     required
-                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-hidden focus:ring-2 focus:ring-blue-500"
                     placeholder="Enter your email"
                   />
                 </div>
@@ -102,7 +102,7 @@ import { LoginCredentials, RegisterData } from '../../../../shared/src/types';
                     name="password"
                     [(ngModel)]="loginData.password"
                     required
-                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-hidden focus:ring-2 focus:ring-blue-500"
                     placeholder="Enter your password"
                   />
                 </div>
@@ -147,7 +147,7 @@ import { LoginCredentials, RegisterData } from '../../../../shared/src/types';
                       id="first-name"
                       name="firstName"
                       [(ngModel)]="registerData.first_name"
-                      class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-hidden focus:ring-2 focus:ring-blue-500"
                       placeholder="First name"
                     />
                   </div>
@@ -161,7 +161,7 @@ import { LoginCredentials, RegisterData } from '../../../../shared/src/types';
                       id="last-name"
                       name="lastName"
                       [(ngModel)]="registerData.last_name"
-                      class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-hidden focus:ring-2 focus:ring-blue-500"
                       placeholder="Last name"
                     />
                   </div>
@@ -177,7 +177,7 @@ import { LoginCredentials, RegisterData } from '../../../../shared/src/types';
                     name="email"
                     [(ngModel)]="registerData.email"
                     required
-                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-hidden focus:ring-2 focus:ring-blue-500"
                     placeholder="Enter your email"
                   />
                 </div>
@@ -195,7 +195,7 @@ import { LoginCredentials, RegisterData } from '../../../../shared/src/types';
                     [(ngModel)]="registerData.password"
                     required
                     minlength="8"
-                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-hidden focus:ring-2 focus:ring-blue-500"
                     placeholder="Create a password"
                   />
                 </div>
@@ -209,7 +209,7 @@ import { LoginCredentials, RegisterData } from '../../../../shared/src/types';
                     id="phone"
                     name="phone"
                     [(ngModel)]="registerData.phone"
-                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-hidden focus:ring-2 focus:ring-blue-500"
                     placeholder="Phone number"
                   />
                 </div>

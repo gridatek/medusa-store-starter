@@ -92,7 +92,7 @@ interface ShippingOption {
           <div data-testid="checkout-form" class="space-y-8">
             <!-- Step 1: Contact Information -->
             @if (currentStep === 'contact') {
-              <div class="bg-white rounded-lg shadow p-6">
+              <div class="bg-white rounded-lg shadow-sm p-6">
                 <h2 class="text-lg font-medium text-gray-900 mb-4">Contact Information</h2>
                 <!-- Guest/Login Options -->
                 @if (!currentCustomer) {
@@ -139,7 +139,7 @@ interface ShippingOption {
                             [(ngModel)]="loginData.email"
                             name="loginEmail"
                             required
-                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-hidden focus:ring-2 focus:ring-blue-500"
                           />
                         </div>
                         <div>
@@ -151,7 +151,7 @@ interface ShippingOption {
                             [(ngModel)]="loginData.password"
                             name="loginPassword"
                             required
-                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-hidden focus:ring-2 focus:ring-blue-500"
                           />
                         </div>
                       </div>
@@ -178,7 +178,7 @@ interface ShippingOption {
                       [(ngModel)]="contactInfo.email"
                       required
                       [disabled]="!!currentCustomer"
-                      class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
+                      class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-hidden focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
                       placeholder="Enter your email address"
                     />
                   </div>
@@ -194,7 +194,7 @@ interface ShippingOption {
                         name="firstName"
                         [(ngModel)]="contactInfo.first_name"
                         required
-                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-hidden focus:ring-2 focus:ring-blue-500"
                         placeholder="First name"
                       />
                     </div>
@@ -209,7 +209,7 @@ interface ShippingOption {
                         name="lastName"
                         [(ngModel)]="contactInfo.last_name"
                         required
-                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-hidden focus:ring-2 focus:ring-blue-500"
                         placeholder="Last name"
                       />
                     </div>
@@ -228,7 +228,7 @@ interface ShippingOption {
 
             <!-- Step 2: Shipping Address -->
             @if (currentStep === 'shipping') {
-              <div class="bg-white rounded-lg shadow p-6">
+              <div class="bg-white rounded-lg shadow-sm p-6">
                 <h2 class="text-lg font-medium text-gray-900 mb-4">Shipping Address</h2>
                 <form (ngSubmit)="proceedToPayment()">
                   <div class="space-y-4">
@@ -243,7 +243,7 @@ interface ShippingOption {
                         name="address1"
                         [(ngModel)]="shippingAddress.address_1"
                         required
-                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-hidden focus:ring-2 focus:ring-blue-500"
                         placeholder="Street address"
                       />
                     </div>
@@ -256,7 +256,7 @@ interface ShippingOption {
                         id="address2"
                         name="address2"
                         [(ngModel)]="shippingAddress.address_2"
-                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-hidden focus:ring-2 focus:ring-blue-500"
                         placeholder="Apartment, suite, etc."
                       />
                     </div>
@@ -272,7 +272,7 @@ interface ShippingOption {
                           name="city"
                           [(ngModel)]="shippingAddress.city"
                           required
-                          class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-hidden focus:ring-2 focus:ring-blue-500"
                           placeholder="City"
                         />
                       </div>
@@ -285,7 +285,7 @@ interface ShippingOption {
                           id="province"
                           name="province"
                           [(ngModel)]="shippingAddress.province"
-                          class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-hidden focus:ring-2 focus:ring-blue-500"
                           placeholder="State/Province"
                         />
                       </div>
@@ -300,7 +300,7 @@ interface ShippingOption {
                           name="postalCode"
                           [(ngModel)]="shippingAddress.postal_code"
                           required
-                          class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-hidden focus:ring-2 focus:ring-blue-500"
                           placeholder="Postal code"
                         />
                       </div>
@@ -314,7 +314,7 @@ interface ShippingOption {
                         name="country"
                         [(ngModel)]="shippingAddress.country_code"
                         required
-                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-hidden focus:ring-2 focus:ring-blue-500"
                       >
                         <option value="">Select Country</option>
                         <option value="us">United States</option>
@@ -333,7 +333,7 @@ interface ShippingOption {
                         id="phone"
                         name="phone"
                         [(ngModel)]="shippingAddress.phone"
-                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-hidden focus:ring-2 focus:ring-blue-500"
                         placeholder="Phone number"
                       />
                     </div>
@@ -409,7 +409,7 @@ interface ShippingOption {
 
             <!-- Step 3: Payment -->
             @if (currentStep === 'payment') {
-              <div class="bg-white rounded-lg shadow p-6">
+              <div class="bg-white rounded-lg shadow-sm p-6">
                 <h2 class="text-lg font-medium text-gray-900 mb-4">Payment Information</h2>
                 <div class="mb-6">
                   <h3 class="text-sm font-medium text-gray-900 mb-3">Payment Method</h3>
@@ -440,7 +440,7 @@ interface ShippingOption {
                         <input
                           type="text"
                           placeholder="1234 5678 9012 3456"
-                          class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-hidden focus:ring-2 focus:ring-blue-500"
                         />
                       </div>
                       <div class="grid grid-cols-2 gap-4">
@@ -451,7 +451,7 @@ interface ShippingOption {
                           <input
                             type="text"
                             placeholder="MM/YY"
-                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-hidden focus:ring-2 focus:ring-blue-500"
                           />
                         </div>
                         <div>
@@ -459,7 +459,7 @@ interface ShippingOption {
                           <input
                             type="text"
                             placeholder="123"
-                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-hidden focus:ring-2 focus:ring-blue-500"
                           />
                         </div>
                       </div>
@@ -470,7 +470,7 @@ interface ShippingOption {
                         <input
                           type="text"
                           placeholder="Full name on card"
-                          class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-hidden focus:ring-2 focus:ring-blue-500"
                         />
                       </div>
                     </div>

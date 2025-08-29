@@ -53,7 +53,7 @@ import { ProductsApiService } from '../services/products-api.service';
                   @for (image of productImages; track image; let i = $index) {
                     <button
                       data-testid="image-thumbnail"
-                      class="relative h-24 bg-white rounded-md flex items-center justify-center text-sm font-medium uppercase text-gray-900 cursor-pointer hover:bg-gray-50 focus:outline-none focus:ring focus:ring-offset-4 focus:ring-blue-500"
+                      class="relative h-24 bg-white rounded-md flex items-center justify-center text-sm font-medium uppercase text-gray-900 cursor-pointer hover:bg-gray-50 focus:outline-hidden focus:ring-3 focus:ring-offset-4 focus:ring-blue-500"
                       [class.ring-2]="selectedImageIndex === i"
                       [class.ring-blue-500]="selectedImageIndex === i"
                       (click)="selectImage(i)"
@@ -126,7 +126,7 @@ import { ProductsApiService } from '../services/products-api.service';
                         @for (value of getOptionValues(option.id); track value) {
                           <button
                             data-testid="variant-option"
-                            class="px-3 py-2 text-sm border rounded-md hover:border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            class="px-3 py-2 text-sm border rounded-md hover:border-gray-300 focus:outline-hidden focus:ring-2 focus:ring-blue-500"
                             [class.border-blue-500]="isOptionSelected(option.id, value.id)"
                             [class.bg-blue-50]="isOptionSelected(option.id, value.id)"
                             (click)="selectOption(option.id, value.id)"
@@ -149,7 +149,7 @@ import { ProductsApiService } from '../services/products-api.service';
                 <div class="flex items-center border border-gray-300 rounded-md">
                   <button
                     data-testid="quantity-decrease"
-                    class="px-3 py-2 text-gray-600 hover:text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    class="px-3 py-2 text-gray-600 hover:text-gray-800 focus:outline-hidden focus:ring-2 focus:ring-blue-500"
                     [disabled]="quantity <= 1"
                     (click)="decreaseQuantity()"
                   >
@@ -162,12 +162,12 @@ import { ProductsApiService } from '../services/products-api.service';
                     [value]="quantity"
                     min="1"
                     max="10"
-                    class="w-16 px-3 py-2 text-center border-0 focus:outline-none focus:ring-0"
+                    class="w-16 px-3 py-2 text-center border-0 focus:outline-hidden focus:ring-0"
                     (input)="onQuantityChange($event)"
                   />
                   <button
                     data-testid="quantity-increase"
-                    class="px-3 py-2 text-gray-600 hover:text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    class="px-3 py-2 text-gray-600 hover:text-gray-800 focus:outline-hidden focus:ring-2 focus:ring-blue-500"
                     [disabled]="quantity >= 10"
                     (click)="increaseQuantity()"
                   >
@@ -230,7 +230,7 @@ import { ProductsApiService } from '../services/products-api.service';
               <button
                 data-testid="add-to-cart-button"
                 type="button"
-                class="w-full bg-blue-600 border border-transparent rounded-md py-3 px-8 flex items-center justify-center text-base font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:bg-gray-300 disabled:cursor-not-allowed"
+                class="w-full bg-blue-600 border border-transparent rounded-md py-3 px-8 flex items-center justify-center text-base font-medium text-white hover:bg-blue-700 focus:outline-hidden focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:bg-gray-300 disabled:cursor-not-allowed"
                 [disabled]="!canAddToCart() || isAddingToCart"
                 (click)="addToCart()"
               >

@@ -24,7 +24,7 @@ import { Customer, Order } from '../../../../shared/src/types';
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <!-- Account Info -->
           <div class="lg:col-span-2">
-            <div class="bg-white rounded-lg shadow p-6 mb-6">
+            <div class="bg-white rounded-lg shadow-sm p-6 mb-6">
               <h2 class="text-xl font-semibold mb-4">Account Information</h2>
               <form (ngSubmit)="updateProfile()" #profileForm="ngForm">
                 <div class="grid grid-cols-2 gap-4 mb-4">
@@ -34,7 +34,7 @@ import { Customer, Order } from '../../../../shared/src/types';
                       type="text"
                       name="firstName"
                       [(ngModel)]="customer.first_name"
-                      class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-hidden focus:ring-2 focus:ring-blue-500"
                     />
                   </div>
                   <div>
@@ -43,7 +43,7 @@ import { Customer, Order } from '../../../../shared/src/types';
                       type="text"
                       name="lastName"
                       [(ngModel)]="customer.last_name"
-                      class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-hidden focus:ring-2 focus:ring-blue-500"
                     />
                   </div>
                 </div>
@@ -53,7 +53,7 @@ import { Customer, Order } from '../../../../shared/src/types';
                     type="email"
                     name="email"
                     [(ngModel)]="customer.email"
-                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-hidden focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
                 <div class="mb-4">
@@ -62,7 +62,7 @@ import { Customer, Order } from '../../../../shared/src/types';
                     type="tel"
                     name="phone"
                     [(ngModel)]="customer.phone"
-                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-hidden focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
                 <button
@@ -74,7 +74,7 @@ import { Customer, Order } from '../../../../shared/src/types';
               </form>
             </div>
             <!-- Order History -->
-            <div class="bg-white rounded-lg shadow p-6">
+            <div class="bg-white rounded-lg shadow-sm p-6">
               <h2 class="text-xl font-semibold mb-4">Order History</h2>
               @if (orders.length === 0) {
                 <div class="text-center py-8 text-gray-500">
@@ -114,7 +114,7 @@ import { Customer, Order } from '../../../../shared/src/types';
           </div>
           <!-- Sidebar -->
           <div>
-            <div class="bg-white rounded-lg shadow p-6">
+            <div class="bg-white rounded-lg shadow-sm p-6">
               <h3 class="text-lg font-semibold mb-4">Quick Actions</h3>
               <div class="space-y-3">
                 <a href="/account/orders" class="block text-blue-600 hover:text-blue-800"
@@ -134,7 +134,7 @@ import { Customer, Order } from '../../../../shared/src/types';
                 </button>
               </div>
             </div>
-            <div class="bg-white rounded-lg shadow p-6 mt-6">
+            <div class="bg-white rounded-lg shadow-sm p-6 mt-6">
               <h3 class="text-lg font-semibold mb-4">Account Stats</h3>
               <div class="space-y-2">
                 <div class="flex justify-between">
